@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
-	"sync"
 	"syscall"
 	"time"
 	"tinygo.org/x/bluetooth"
@@ -26,11 +25,10 @@ var (
 	txChars           bluetooth.DeviceCharacteristic
 	devAdress         bluetooth.Address
 	service           bluetooth.DeviceService
+	toTerm            bool
 )
 
 func main() {
-	var wg sync.WaitGroup
-	wg.Add(1)
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -39,6 +37,7 @@ func main() {
 		_ = <-sigs
 		fmt.Println()
 		fmt.Println("Terminating")
+		toTerm = true
 		device.Disconnect()
 
 		done <- true
@@ -67,19 +66,21 @@ func main() {
 	}
 
 	startCycle()
-
-	wg.Wait()
-	device.Disconnect()
 }
 
 func startCycle() {
+	initData()
+
 	for {
 		connect()
-		initData()
 		//go readChan()
 		writerChan()
 
-		time.Sleep(10 * time.Second)
+		if toTerm {
+			break
+		} else {
+			time.Sleep(10 * time.Second)
+		}
 	}
 }
 
@@ -104,9 +105,13 @@ func writerChan() {
 	errCount := 0
 
 	for {
+		if toTerm {
+			break
+		}
+
 		resp, err := txChars.WriteWithoutResponse(dd)
 		if resp == 0 {
-			println(err)
+			println(err.Error())
 			errCount++
 		} else {
 			errCount = 0

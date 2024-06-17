@@ -59,22 +59,21 @@ func connect() {
 	txUid, err := bluetooth.ParseUUID(txUUIDString)
 	rxUid, err := bluetooth.ParseUUID(rxUUIDString)
 
-	println("discovering services/characteristics")
-
 	var services []bluetooth.DeviceService
 	for {
+		println("discovering services/characteristics")
 		services, err = device.DiscoverServices([]bluetooth.UUID{srvUid})
 		if err != nil {
 			println(err.Error())
 
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 1)
 		} else {
 			break
 		}
 	}
 
 	if len(services) == 0 {
-		panic("could not find heart rate serviceUUIDString")
+		panic("could not find services")
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
