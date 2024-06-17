@@ -127,7 +127,7 @@ func writerChan() {
 
 func read(data []byte) {
 	println("data:", data)
-	if data[1] == 0x03 {
+	if data[1] == 0x03 && len(data) >= 26 {
 
 		mos := getMOS(data[24])
 		bmsData := JbdData{
