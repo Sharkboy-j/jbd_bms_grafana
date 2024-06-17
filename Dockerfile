@@ -1,10 +1,10 @@
-FROM golang:1.21.5-alpine3.19 AS builder
+FROM golang:1.22-alpine3.20 AS builder
 WORKDIR /build
 COPY  . .
 RUN go mod download
 RUN go build -o /bleTest main.go
 
-FROM alpine:3.19
+FROM alpine:3.20
 WORKDIR /
 
 COPY --from=builder /bleTest /
