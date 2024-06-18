@@ -32,7 +32,6 @@ func toVersion(versionByte byte) string {
 	major := versionByte >> 4   // старшие 4 бита
 	minor := versionByte & 0x0F // младшие 4 бита
 
-	// Форматирование строки версии
 	version := fmt.Sprintf("%d.%d", major, minor)
 
 	return version

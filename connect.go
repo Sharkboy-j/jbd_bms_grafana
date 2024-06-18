@@ -12,7 +12,7 @@ var (
 )
 
 func connect() {
-	println("enable BLE")
+	log.Infof("enable BLE")
 	err := adapter.Enable()
 	if err != nil {
 		println(err.Error())
@@ -22,9 +22,9 @@ func connect() {
 	}
 
 	ch := make(chan bluetooth.ScanResult, 1)
-	println("scanning...")
+	log.Infof("scanning...")
 	go adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
-		println("found device:", result.Address.String(), result.RSSI, result.LocalName())
+		log.Infof("found device:%s %d %s", result.Address.String(), result.RSSI, result.LocalName())
 		if result.Address.String() == devAdress.String() {
 			adapter.StopScan()
 			ch <- result
@@ -43,7 +43,7 @@ func connect() {
 
 		if err != nil {
 			if err.Error() == conErr.Error() {
-				println(fmt.Sprintf("%s not found", devAdress.String()))
+				log.Errorf(fmt.Sprintf("%s not found", devAdress.String()))
 				time.Sleep(time.Second * 3)
 			} else {
 				panic(err)
@@ -53,7 +53,7 @@ func connect() {
 		}
 	}
 
-	println("connected to ", devAdress.String())
+	log.Infof("connected: %s", devAdress.String())
 
 	srvUid, err := bluetooth.ParseUUID(serviceUUIDString)
 	txUid, err := bluetooth.ParseUUID(txUUIDString)
@@ -61,10 +61,10 @@ func connect() {
 
 	var services []bluetooth.DeviceService
 	for {
-		println("discovering services/characteristics")
+		log.Infof("discovering services/characteristics")
 		services, err = device.DiscoverServices([]bluetooth.UUID{srvUid})
 		if err != nil {
-			println(err.Error())
+			log.Errorf(err.Error())
 
 			time.Sleep(time.Second * 1)
 		} else {
@@ -81,11 +81,11 @@ func connect() {
 	}
 	service = services[0]
 
-	println("found serviceUUIDString", service.UUID().String())
+	log.Infof("found servicec: %s", service.UUID().String())
 
 	rx, err := service.DiscoverCharacteristics([]bluetooth.UUID{rxUid})
 	if err != nil {
-		println(err)
+		log.Errorf(err.Error())
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
@@ -93,7 +93,7 @@ func connect() {
 	}
 
 	if len(rx) == 0 {
-		println("could not get rx chan")
+		log.Errorf("could not get rx chan")
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
@@ -102,14 +102,14 @@ func connect() {
 
 	tx, err := service.DiscoverCharacteristics([]bluetooth.UUID{txUid})
 	if err != nil {
-		println(err)
+		log.Errorf(err.Error())
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
 		return
 	}
 	if len(tx) == 0 {
-		panic("could not tx characteristic")
+		log.Errorf("could not tx characteristic")
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
@@ -121,8 +121,10 @@ func connect() {
 
 	err = rxChars.EnableNotifications(notify)
 	if err != nil {
-		panic(err.Error())
+		log.Errorf(err.Error())
 		device.Disconnect()
+
+		return
 	}
 }
 

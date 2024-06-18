@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bleTest/logger"
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"os"
@@ -26,17 +28,19 @@ var (
 	devAdress         bluetooth.Address
 	service           bluetooth.DeviceService
 	toTerm            bool
+	log               *logger.Logger
 )
 
 func main() {
+	log = logger.New()
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	done := make(chan bool, 1)
 	go func() {
 		_ = <-sigs
-		fmt.Println()
-		fmt.Println("Terminating")
+		log.Infof("Terminating")
+
 		toTerm = true
 		device.Disconnect()
 
@@ -126,7 +130,7 @@ func writerChan() {
 }
 
 func read(data []byte) {
-	println("data:", data)
+	log.Debugf("data: %s", hex.EncodeToString(data))
 	if data[1] == 0x03 && len(data) >= 26 {
 
 		mos := getMOS(data[24])
@@ -149,7 +153,7 @@ func read(data []byte) {
 			bmsData.Temp = append(bmsData.Temp, temperature)
 		}
 		//clearConsole()
-		println(bmsData.String())
+		log.Debugf(bmsData.String())
 		pushTo(&bmsData)
 	}
 }
