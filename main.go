@@ -3,7 +3,6 @@ package main
 import (
 	"bleTest/app"
 	"bleTest/logger"
-	"bytes"
 	"context"
 	"encoding/hex"
 	"fmt"
@@ -66,29 +65,13 @@ func startCycle() {
 			break
 		}
 		connect(ctx)
-		//go readChan()
-		writerChan()
+		go writerChan()
 
 		if app.Canceled {
 			break
 		} else {
-			time.Sleep(10 * time.Second)
+			time.Sleep(3 * time.Second)
 		}
-	}
-}
-
-func readChan() {
-	for {
-		var ppps = make([]byte, 1024)
-
-		rxChars.Read(ppps)
-		parts := bytes.Split(ppps, []byte{stopBit})
-
-		if len(parts[0]) > 4 {
-			read(parts[0])
-		}
-
-		time.Sleep(3 * time.Second)
 	}
 }
 

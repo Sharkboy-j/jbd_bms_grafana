@@ -76,6 +76,10 @@ func connect(ctx context.Context) {
 
 	var services []bluetooth.DeviceService
 	for {
+		if app.Canceled {
+			return
+		}
+
 		log.Infof("discovering services/characteristics")
 		services, err = device.DiscoverServices([]bluetooth.UUID{srvUid})
 		if err != nil {
