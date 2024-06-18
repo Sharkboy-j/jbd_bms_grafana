@@ -13,15 +13,8 @@ var (
 	device bluetooth.Device
 )
 
-func connCallb(device bluetooth.Device, connected bool) {
-
-}
-
 func connect(ctx context.Context) bool {
 	log.Infof("enable BLE")
-
-	adapter.SetConnectHandler(connCallb)
-
 	err := adapter.Enable()
 	if err != nil {
 		log.Errorf(err.Error())
@@ -168,8 +161,8 @@ func notify(buf []byte) {
 		buff = buf
 	} else if buf[len(buf)-1] == stopBit {
 		buff = append(buff, buf...)
-		read(buff)
-		buff = []byte{}
+		go read(buff)
+		buff = nil
 	} else {
 		buff = append(buff, buf...)
 	}

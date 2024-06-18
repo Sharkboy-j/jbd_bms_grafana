@@ -66,6 +66,7 @@ func main() {
 			time.Sleep(3 * time.Second)
 		}
 	}
+	log.Debugf("2")
 }
 
 func writerChan() {
@@ -92,6 +93,7 @@ func writerChan() {
 
 		time.Sleep(3 * time.Second)
 	}
+	log.Debugf("1")
 }
 
 func read(data []byte) {
@@ -118,7 +120,7 @@ func read(data []byte) {
 			bmsData.Temp = append(bmsData.Temp, temperature)
 		}
 		//clearConsole()
-		log.Debugf(bmsData.String())
+		//log.Debugf(bmsData.String())
 		pushTo(&bmsData)
 	}
 }
