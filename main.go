@@ -1,16 +1,16 @@
 package main
 
 import (
+	"bleTest/app"
 	"bleTest/logger"
 	"bytes"
+	"context"
 	"encoding/hex"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"os"
 	"os/exec"
-	"os/signal"
 	"runtime"
-	"syscall"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
@@ -27,25 +27,13 @@ var (
 	txChars           bluetooth.DeviceCharacteristic
 	devAdress         bluetooth.Address
 	service           bluetooth.DeviceService
-	toTerm            bool
 	log               *logger.Logger
+	ctx               context.Context
 )
 
 func main() {
 	log = logger.New()
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	done := make(chan bool, 1)
-	go func() {
-		_ = <-sigs
-		log.Infof("Terminating")
-
-		toTerm = true
-		device.Disconnect()
-
-		done <- true
-	}()
+	ctx = app.SigTermIntCtx()
 
 	parser := argparse.NewParser("print", "Prints provided string to stdout")
 	s := parser.String("m", "mac", &argparse.Options{Required: false, Help: "required when win or linux"})
@@ -55,9 +43,7 @@ func main() {
 		*s = "A5:C2:37:06:1B:C9"
 	}
 
-	os := runtime.GOOS
-
-	switch os {
+	switch runtime.GOOS {
 	case "windows", "linux", "baremetal":
 		devAdress = getAdress(*s)
 	case "darwin":
@@ -66,7 +52,7 @@ func main() {
 
 		devAdress = getAdress(*u)
 	default:
-		fmt.Printf("Current platform is %s\n", os)
+		fmt.Printf("Current platform is %s\n", runtime.GOOS)
 	}
 
 	startCycle()
@@ -76,11 +62,14 @@ func startCycle() {
 	initData()
 
 	for {
-		connect()
+		if app.Canceled {
+			break
+		}
+		connect(ctx)
 		//go readChan()
 		writerChan()
 
-		if toTerm {
+		if app.Canceled {
 			break
 		} else {
 			time.Sleep(10 * time.Second)
@@ -109,13 +98,13 @@ func writerChan() {
 	errCount := 0
 
 	for {
-		if toTerm {
+		if app.Canceled {
 			break
 		}
 
 		resp, err := txChars.WriteWithoutResponse(dd)
 		if resp == 0 {
-			println(err.Error())
+			log.Errorf(err.Error())
 			errCount++
 		} else {
 			errCount = 0

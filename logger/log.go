@@ -2,7 +2,6 @@ package logger
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -26,14 +25,7 @@ func New() *Logger {
 	inst := logrus.New()
 
 	inst.SetFormatter(&logrus.TextFormatter{})
-
-	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("Failed to open log file: %v", err)
-	}
-
-	multiWriter := io.MultiWriter(file, os.Stdout)
-	log.SetOutput(multiWriter)
+	log.SetOutput(os.Stdout)
 
 	inst.SetLevel(logrus.DebugLevel)
 	inst.Warningf("Log EnvLevel: %s", logrus.DebugLevel.String())
