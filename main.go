@@ -64,8 +64,9 @@ func startCycle() {
 		if app.Canceled {
 			break
 		}
-		connect(ctx)
-		go writerChan()
+		if connect(ctx) && app.Canceled == false {
+			go writerChan()
+		}
 
 		if app.Canceled {
 			break

@@ -13,14 +13,14 @@ var (
 	device bluetooth.Device
 )
 
-func connect(ctx context.Context) {
+func connect(ctx context.Context) bool {
 	log.Infof("enable BLE")
 	err := adapter.Enable()
 	if err != nil {
 		log.Errorf(err.Error())
 		time.Sleep(time.Second * 3)
 
-		return
+		return false
 	}
 
 	ch := make(chan *bluetooth.ScanResult, 1)
@@ -42,7 +42,7 @@ func connect(ctx context.Context) {
 
 	for {
 		if app.Canceled {
-			return
+			return false
 		}
 
 		device, err = adapter.Connect(result.Address, bluetooth.ConnectionParams{
@@ -59,7 +59,7 @@ func connect(ctx context.Context) {
 			} else {
 				log.Errorf(err.Error())
 
-				return
+				return false
 			}
 		} else {
 			break
@@ -77,7 +77,7 @@ func connect(ctx context.Context) {
 	var services []bluetooth.DeviceService
 	for {
 		if app.Canceled {
-			return
+			return false
 		}
 
 		log.Infof("discovering services/characteristics")
@@ -89,7 +89,7 @@ func connect(ctx context.Context) {
 			if errCount > 10 {
 				device.Disconnect()
 
-				return
+				return false
 			}
 
 			time.Sleep(time.Second * 1)
@@ -103,7 +103,7 @@ func connect(ctx context.Context) {
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
-		return
+		return false
 	}
 	service = services[0]
 
@@ -115,7 +115,7 @@ func connect(ctx context.Context) {
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
-		return
+		return false
 	}
 
 	if len(rx) == 0 {
@@ -123,7 +123,7 @@ func connect(ctx context.Context) {
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
-		return
+		return false
 	}
 
 	tx, err := service.DiscoverCharacteristics([]bluetooth.UUID{txUid})
@@ -132,14 +132,14 @@ func connect(ctx context.Context) {
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
-		return
+		return false
 	}
 	if len(tx) == 0 {
 		log.Errorf("could not tx characteristic")
 		device.Disconnect()
 		time.Sleep(time.Second * 3)
 
-		return
+		return false
 	}
 
 	txChars = tx[0]
@@ -150,8 +150,10 @@ func connect(ctx context.Context) {
 		log.Errorf(err.Error())
 		device.Disconnect()
 
-		return
+		return false
 	}
+
+	return true
 }
 
 func notify(buf []byte) {
