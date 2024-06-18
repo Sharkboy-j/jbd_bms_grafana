@@ -53,23 +53,15 @@ func main() {
 	default:
 		fmt.Printf("Current platform is %s\n", runtime.GOOS)
 	}
-
-	startCycle()
-}
-
-func startCycle() {
 	initData()
 
 	for {
-		if app.Canceled {
-			break
-		}
 		if connect(ctx) && app.Canceled == false {
-			go writerChan()
+			writerChan()
 		}
 
 		if app.Canceled {
-			break
+			return
 		} else {
 			time.Sleep(3 * time.Second)
 		}
