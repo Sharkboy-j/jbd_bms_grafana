@@ -83,12 +83,15 @@ func connect(ctx context.Context) {
 		log.Infof("discovering services/characteristics")
 		services, err = device.DiscoverServices([]bluetooth.UUID{srvUid})
 		if err != nil {
-			log.Errorf(err.Error())
 			errCount++
+			log.Errorf("%d %v", errCount, err.Error())
 
 			if errCount > 10 {
+				device.Disconnect()
+
 				return
 			}
+
 			time.Sleep(time.Second * 1)
 		} else {
 			break
