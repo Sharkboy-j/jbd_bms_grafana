@@ -109,6 +109,7 @@ func writerChan() {
 				if err2 == NotConnectedError.Error() {
 					log.Errorf(fmt.Errorf("not connected error").Error())
 					device.Disconnect()
+					rxChars.EnableNotifications(nil)
 
 					break
 				}
