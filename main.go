@@ -66,10 +66,10 @@ func main() {
 
 	go starty()
 
-	for {
-		log.Debugf(time.Now().String())
-		time.Sleep(time.Second * 1)
-	}
+	//for {
+	//	log.Debugf(time.Now().String())
+	//	time.Sleep(time.Second * 1)
+	//}
 
 	<-done
 
