@@ -5,6 +5,7 @@ import (
 	"bleTest/logger"
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/godbus/dbus/v5"
@@ -27,6 +28,7 @@ var (
 	service           bluetooth.DeviceService
 	log               *logger.Logger
 	ctx               context.Context
+	NotConnectedError = errors.New("Not connected")
 )
 
 func handlePanic() {
@@ -100,9 +102,18 @@ func writerChan() {
 		}
 
 		resp, err := txChars.WriteWithoutResponse(dd)
-		if resp == 0 {
-			if customErr, ok := err.(*dbus.Error); ok {
-				log.Errorf(customErr.Error())
+		if resp == 0 && err != nil {
+			var customErr *dbus.Error
+			if errors.As(err, &customErr) {
+				err2 := customErr.Error()
+				if err2 == NotConnectedError.Error() {
+					log.Errorf(fmt.Errorf("not connected error").Error())
+					device.Disconnect()
+
+					break
+				}
+
+				log.Errorf(fmt.Errorf("custom error: %v", err2).Error())
 			}
 
 			log.Errorf(err.Error())
@@ -117,7 +128,6 @@ func writerChan() {
 
 		time.Sleep(3 * time.Second)
 	}
-	log.Debugf("1")
 }
 
 func read(data []byte) {
