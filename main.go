@@ -94,8 +94,15 @@ func starty() {
 }
 
 func disconnect() {
-	device.Disconnect()
-	rxChars.EnableNotifications(nil)
+	err := device.Disconnect()
+	if err != nil {
+		log.Errorf("Error disconnecting device: %v", err)
+	}
+	err = rxChars.EnableNotifications(nil)
+	if err != nil {
+		log.Errorf("Error enabling notifications: %v", err)
+	}
+
 }
 
 func writerChan() {
