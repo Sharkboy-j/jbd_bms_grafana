@@ -29,6 +29,7 @@ var (
 	log               *logger.Logger
 	ctx               context.Context
 	NotConnectedError = errors.New("Not connected")
+	AsyncStatus3Error = errors.New("async operation failed with status 3")
 )
 
 func handlePanic() {
@@ -92,6 +93,11 @@ func starty() {
 	}
 }
 
+func disconnect() {
+	device.Disconnect()
+	rxChars.EnableNotifications(nil)
+}
+
 func writerChan() {
 	var dd = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
 	errCount := 0
@@ -106,15 +112,20 @@ func writerChan() {
 			var customErr *dbus.Error
 			if errors.As(err, &customErr) {
 				err2 := customErr.Error()
-				if err2 == NotConnectedError.Error() {
+				if errors.Is(customErr, NotConnectedError) {
 					log.Errorf(fmt.Errorf("not connected error").Error())
-					device.Disconnect()
-					rxChars.EnableNotifications(nil)
+					disconnect()
 
 					break
 				}
 
 				log.Errorf(fmt.Errorf("custom error: %v", err2).Error())
+			} else {
+				if errors.Is(err, AsyncStatus3Error) {
+					disconnect()
+
+					break
+				}
 			}
 
 			log.Errorf(err.Error())
