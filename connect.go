@@ -2,7 +2,6 @@ package main
 
 import (
 	"bleTest/app"
-	"context"
 	"fmt"
 	"time"
 	"tinygo.org/x/bluetooth"
@@ -13,7 +12,7 @@ var (
 	device bluetooth.Device
 )
 
-func connect(_ context.Context) bool {
+func connect() bool {
 	log.Infof("enable BLE")
 
 	err := adapter.Enable()
@@ -118,7 +117,7 @@ func connect(_ context.Context) bool {
 
 		return false
 	}
-	service = services[0]
+	service = &services[0]
 
 	log.Infof("found servicec: %s", service.UUID().String())
 
@@ -155,8 +154,8 @@ func connect(_ context.Context) bool {
 		return false
 	}
 
-	txChars = tx[0]
-	rxChars = rx[0]
+	txChars = &tx[0]
+	rxChars = &rx[0]
 
 	err = rxChars.EnableNotifications(notify)
 	if err != nil {
@@ -174,7 +173,7 @@ func notify(buf []byte) {
 		buff = buf
 	} else if buf[len(buf)-1] == stopBit {
 		buff = append(buff, buf...)
-		go read(buff)
+		parseData()
 		buff = nil
 	} else {
 		buff = append(buff, buf...)

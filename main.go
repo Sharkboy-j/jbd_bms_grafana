@@ -3,34 +3,37 @@ package main
 import (
 	"bleTest/app"
 	"bleTest/logger"
-	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/akamensky/argparse"
 	"github.com/godbus/dbus/v5"
 	"runtime"
+	"runtime/debug"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
 
 var (
-	adapter                = bluetooth.DefaultAdapter
-	serviceUUIDString      = "0000ff00-0000-1000-8000-00805f9b34fb"
-	rxUUIDString           = "0000ff01-0000-1000-8000-00805f9b34fb"
-	txUUIDString           = "0000ff02-0000-1000-8000-00805f9b34fb"
-	startBit          byte = 0xDD
-	stopBit           byte = 0x77
-	buff                   = make([]byte, 0)
-	rxChars           bluetooth.DeviceCharacteristic
-	txChars           bluetooth.DeviceCharacteristic
-	devAdress         bluetooth.Address
-	service           bluetooth.DeviceService
+	adapter           = *bluetooth.DefaultAdapter
+	serviceUUIDString = "0000ff00-0000-1000-8000-00805f9b34fb"
+	rxUUIDString      = "0000ff01-0000-1000-8000-00805f9b34fb"
+	txUUIDString      = "0000ff02-0000-1000-8000-00805f9b34fb"
+	buff              = make([]byte, 50)
+	rxChars           *bluetooth.DeviceCharacteristic
+	txChars           *bluetooth.DeviceCharacteristic
+	devAdress         *bluetooth.Address
+	service           *bluetooth.DeviceService
 	log               *logger.Logger
-	ctx               context.Context
 	NotConnectedError = errors.New("Not connected")
 	AsyncStatus3Error = errors.New("async operation failed with status 3")
+	ReadMessage       = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
+	bmsData           = &JbdData{}
+	lastInd           = 0
 )
+
+const startBit byte = 0xDD
+const stopBit byte = 0x77
 
 func handlePanic() {
 	if r := recover(); r != nil {
@@ -40,11 +43,12 @@ func handlePanic() {
 }
 
 func main() {
+	debug.SetGCPercent(10)
 	done := make(chan bool, 1)
 	defer handlePanic()
 
 	log = logger.New()
-	ctx = app.SigTermIntCtx()
+	//ctx = app.SigTermIntCtx()
 
 	parser := argparse.NewParser("print", "Prints provided string to stdout")
 	s := parser.String("m", "mac", &argparse.Options{Required: false, Help: "required when win or linux"})
@@ -81,7 +85,7 @@ func main() {
 
 func starty() {
 	for {
-		if connect(ctx) && app.Canceled == false {
+		if connect() && app.Canceled == false {
 			writerChan()
 		}
 
@@ -106,7 +110,6 @@ func disconnect() {
 }
 
 func writerChan() {
-	var dd = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
 	errCount := 0
 
 	for {
@@ -114,7 +117,7 @@ func writerChan() {
 			break
 		}
 
-		resp, err := txChars.WriteWithoutResponse(dd)
+		resp, err := txChars.WriteWithoutResponse(ReadMessage)
 		if resp == 0 && err != nil {
 			var customErr *dbus.Error
 			if errors.As(err, &customErr) {
@@ -141,7 +144,7 @@ func writerChan() {
 			errCount = 0
 		}
 
-		if errCount > 10 {
+		if errCount > 4 {
 			break
 		}
 
@@ -149,31 +152,38 @@ func writerChan() {
 	}
 }
 
-func read(data []byte) {
-	log.Debugf("data: %s", hex.EncodeToString(data))
-	if data[1] == 0x03 && len(data) >= 26 {
+func parseData() {
+	if isValid() {
+		log.Debugf("data: %s %d", hex.EncodeToString(buff), len(buff))
+		if buff[1] == 0x03 && len(buff) >= 26 {
 
-		mos := getMOS(data[24])
-		bmsData := JbdData{
-			Volts:             toFloat([]byte{data[4], data[5]}) / 100,
-			Current:           toFloat([]byte{data[6], data[7]}) / 100,
-			RemainingCapacity: toFloat([]byte{data[8], data[9]}) / 100,
-			NominalCapcity:    toFloat([]byte{data[10], data[11]}) / 100,
-			Cycles:            toFloat([]byte{data[12], data[13]}),
-			Version:           toVersion(data[22]),
-			RemainingPercent:  toPercents(data[23]),
-			Series:            toInt(data[25]),
+			mos := getMOS(buff[24])
+			bmsData.Volts = toFloat([]byte{buff[4], buff[5]}) / 100
+			bmsData.Current = toFloat([]byte{buff[6], buff[7]}) / 100
+			bmsData.RemainingCapacity = toFloat([]byte{buff[8], buff[9]}) / 100
+			bmsData.NominalCapcity = toFloat([]byte{buff[10], buff[11]}) / 100
+			bmsData.Cycles = toFloat([]byte{buff[12], buff[13]})
+			bmsData.Version = toVersion(buff[22])
+			bmsData.RemainingPercent = toPercents(buff[23])
+			bmsData.Series = toInt(buff[25])
 			//Temp:              toFloat(),
-			MosChargingEnabled:    mos.Charging,
-			MosDischargingEnabled: mos.Discharging,
-		}
+			bmsData.MosChargingEnabled = mos.Charging
+			bmsData.MosDischargingEnabled = mos.Discharging
 
-		for i := 0; i < int(data[26]); i++ {
-			temperature := (float32(data[27+i*2])*256 + float32(data[28+i*2]) - 2731) / 10
-			bmsData.Temp = append(bmsData.Temp, temperature)
+			temp := make([]float32, int(buff[26]))
+			for i := 0; i < int(buff[26]); i++ {
+				temperature := (float32(buff[27+i*2])*256 + float32(buff[28+i*2]) - 2731) / 10
+				temp = append(temp, temperature)
+			}
+			bmsData.Temp = temp
+
+			//clearConsole()
+			//log.Debugf(bmsData.String())
+			pushTo(bmsData)
 		}
-		//clearConsole()
-		//log.Debugf(bmsData.String())
-		pushTo(&bmsData)
 	}
+}
+
+func isValid() bool {
+	return buff[0] == startBit && buff[len(buff)-1] == stopBit
 }
