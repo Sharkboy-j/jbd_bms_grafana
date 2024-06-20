@@ -32,5 +32,5 @@ func pushTo(data *JbdData) {
 		log.Errorf("Error writing point to InfluxDB: %v", err)
 	}
 
-	log.Infof("Data written successfully!")
+	//log.Infof("Data written successfully!")
 }

@@ -15,6 +15,7 @@ var (
 
 func connect(ctx context.Context) bool {
 	log.Infof("enable BLE")
+
 	err := adapter.Enable()
 	if err != nil {
 		log.Errorf(err.Error())

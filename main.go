@@ -7,8 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/akamensky/argparse"
-	"os"
-	"os/exec"
+	"github.com/godbus/dbus/v5"
 	"runtime"
 	"time"
 	"tinygo.org/x/bluetooth"
@@ -30,7 +29,17 @@ var (
 	ctx               context.Context
 )
 
+func handlePanic() {
+	if r := recover(); r != nil {
+		log.Debugf("Recovered from panic: %v", r)
+		// Perform any cleanup or logging here
+	}
+}
+
 func main() {
+	done := make(chan bool, 1)
+	defer handlePanic()
+
 	log = logger.New()
 	ctx = app.SigTermIntCtx()
 
@@ -55,23 +64,34 @@ func main() {
 	}
 	initData()
 
+	go starty()
+
+	for {
+		log.Debugf(time.Now().String())
+		time.Sleep(time.Second * 1)
+	}
+
+	<-done
+
+	log.Debugf("Exiting application.")
+}
+
+func starty() {
 	for {
 		if connect(ctx) && app.Canceled == false {
 			writerChan()
 		}
 
 		if app.Canceled {
-			return
+			break
 		} else {
 			time.Sleep(3 * time.Second)
 		}
 	}
-	log.Debugf("2")
 }
 
 func writerChan() {
 	var dd = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
-
 	errCount := 0
 
 	for {
@@ -81,6 +101,10 @@ func writerChan() {
 
 		resp, err := txChars.WriteWithoutResponse(dd)
 		if resp == 0 {
+			if customErr, ok := err.(*dbus.Error); ok {
+				log.Errorf(customErr.Error())
+			}
+
 			log.Errorf(err.Error())
 			errCount++
 		} else {
@@ -123,20 +147,4 @@ func read(data []byte) {
 		//log.Debugf(bmsData.String())
 		pushTo(&bmsData)
 	}
-}
-
-func clearConsole() {
-	var cmd *exec.Cmd
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("cmd", "/c", "cls")
-	case "linux", "darwin": // для macOS и Linux
-		cmd = exec.Command("clear")
-	default:
-		cmd = exec.Command("clear") // по умолчанию для других Unix-подобных систем
-	}
-
-	cmd.Stdout = os.Stdout
-	cmd.Run()
 }
