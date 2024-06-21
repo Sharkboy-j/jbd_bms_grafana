@@ -88,8 +88,6 @@ func starty() {
 	for {
 		if connect() && app.Canceled == false {
 			writerChan()
-			log.Debugf("wait chan")
-			<-MSGcH
 		}
 
 		if app.Canceled {
@@ -150,6 +148,8 @@ func writerChan() {
 			break
 		}
 
+		log.Debugf("wait chan")
+		<-MSGcH
 		time.Sleep(3 * time.Second)
 	}
 }
