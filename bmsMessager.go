@@ -21,6 +21,9 @@ func writerChan() {
 		}
 
 		resp, err := txChars.WriteWithoutResponse(ReadMessage)
+		log.Debugf("writed")
+		msgWG.Add(1)
+
 		if resp == 0 && err != nil {
 			var customErr *dbus.Error
 			if errors.As(err, &customErr) {
@@ -50,7 +53,7 @@ func writerChan() {
 			break
 		}
 
-		log.Debugf("wait chan")
+		log.Debugf("wait fo response")
 		msgWG.Wait()
 
 		time.Sleep(3 * time.Second)
@@ -60,13 +63,17 @@ func writerChan() {
 func recCallb(buf []byte) {
 	if buf[0] == StartBit {
 		buff = buf
+		log.Debugf("read start")
 	} else if buf[len(buf)-1] == StopBit {
 		buff = append(buff, buf...)
+		log.Debugf("read end")
 		parseData()
 		buff = nil
 		log.Debugf("release chan")
 		msgWG.Done()
 	} else {
+		log.Debugf("body")
+
 		buff = append(buff, buf...)
 	}
 }

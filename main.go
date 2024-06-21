@@ -46,7 +46,6 @@ func main() {
 	debug.SetGCPercent(10)
 	done := make(chan bool, 1)
 	defer handlePanic()
-	msgWG.Add(1)
 
 	log = logger.New()
 	//ctx = app.SigTermIntCtx()
