@@ -121,15 +121,14 @@ func writerChan() {
 		if resp == 0 && err != nil {
 			var customErr *dbus.Error
 			if errors.As(err, &customErr) {
-				err2 := customErr.Error()
-				if errors.Is(customErr, NotConnectedError) {
+				if customErr.Error() == NotConnectedError.Error() {
 					log.Errorf(fmt.Errorf("not connected error").Error())
 					disconnect()
 
 					break
+				} else {
+					log.Errorf(fmt.Errorf("custom error: %v", customErr.Error()).Error())
 				}
-
-				log.Errorf(fmt.Errorf("custom error: %v", err2).Error())
 			} else {
 				if errors.Is(err, AsyncStatus3Error) {
 					disconnect()
