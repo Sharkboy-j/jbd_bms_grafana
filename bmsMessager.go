@@ -52,23 +52,24 @@ func writerChan() {
 			var customErr dbus.Error
 			if errors.As(err, &customErr) {
 				log.Debugf("error is *dbus.Error")
+
 				if customErr.Error() == NotConnectedError.Error() {
 					log.Errorf(fmt.Errorf("not connected error").Error())
-					disconnect()
-
-					break
-				} else {
-					log.Errorf(fmt.Errorf("custom error: %v", customErr.Error()).Error())
 				}
+
+				log.Errorf(fmt.Errorf("custom error: %v", customErr.Error()).Error())
+
+				disconnect()
+				break
 			}
 
 			if errors.Is(err, AsyncStatus3Error) {
 				disconnect()
 
 				break
-			} else {
-				log.Errorf("unknown error %s :%v", reflect.TypeOf(err).String(), err.Error())
 			}
+
+			log.Errorf("unknown error %s :%v", reflect.TypeOf(err).String(), err.Error())
 			errCount++
 			if errCount > 4 {
 				break
