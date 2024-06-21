@@ -18,6 +18,8 @@ var (
 )
 
 func timeoutCheck() {
+	log.Debugf("timeout check started")
+
 	for {
 		if isWrited {
 			if time.Since(lastSendTime).Seconds() >= 30 {
