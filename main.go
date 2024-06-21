@@ -2,6 +2,7 @@ package main
 
 import (
 	"bleTest/app"
+	"bleTest/influx"
 	"bleTest/logger"
 	"bleTest/mods"
 	"errors"
@@ -69,7 +70,7 @@ func main() {
 	default:
 		fmt.Printf("Current platform is %s\n", runtime.GOOS)
 	}
-	initData()
+	influx.Init(log)
 
 	go starty()
 

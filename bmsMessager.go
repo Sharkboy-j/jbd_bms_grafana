@@ -2,6 +2,7 @@ package main
 
 import (
 	"bleTest/app"
+	"bleTest/influx"
 	"bleTest/mods"
 	"encoding/hex"
 	"errors"
@@ -53,7 +54,6 @@ func writerChan() {
 			break
 		}
 
-		log.Debugf("wait fo response")
 		msgWG.Wait()
 
 		time.Sleep(3 * time.Second)
@@ -63,20 +63,18 @@ func writerChan() {
 func recCallb(buf []byte) {
 	if buf[0] == StartBit {
 		buff = buf
-		log.Debugf("start WTF: %s %d", hex.EncodeToString(buf), len(buf))
-
+		//log.Debugf("start WTF: %s %d", hex.EncodeToString(buf), len(buf))
 	} else if buf[len(buf)-1] == StopBit {
-		log.Debugf("body WTF: %s %d", hex.EncodeToString(buf), len(buf))
-
+		//log.Debugf("body WTF: %s %d", hex.EncodeToString(buf), len(buf))
 		buff = append(buff, buf...)
-		log.Debugf("read end")
 		go parseData(buff)
 		buff = nil
 		log.Debugf("release chan")
+
 		msgWG.Done()
 	} else {
-		log.Debugf("end WTF: %s %d", hex.EncodeToString(buf), len(buf))
 		buff = append(buff, buf...)
+		//log.Debugf("end WTF: %s %d", hex.EncodeToString(buf), len(buf))
 	}
 }
 
@@ -105,7 +103,7 @@ func parseData(data []byte) {
 			}
 			bmsData.Temp = temp
 
-			pushTo(bmsData)
+			influx.PushTo(bmsData)
 		}
 	}
 }

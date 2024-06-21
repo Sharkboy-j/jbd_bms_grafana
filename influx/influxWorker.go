@@ -1,6 +1,7 @@
-package main
+package influx
 
 import (
+	"bleTest/logger"
 	"bleTest/mods"
 	"context"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -8,10 +9,14 @@ import (
 	"time"
 )
 
-var client influxdb2.Client
-var writeAPI api.WriteAPIBlocking
+var (
+	client   influxdb2.Client
+	writeAPI api.WriteAPIBlocking
+	log      *logger.Logger
+)
 
-func initData() {
+func Init(logger *logger.Logger) {
+	log = logger
 	const influxDBURL = "http://10.0.0.196:8086"
 	const token = "ndAzO_IU75cmGIEseZMEE9ihCYHIxn7qDkvcNlrUcw2ajWgmmt9VKcdlgFsPN8O-_FDga3kEtLnUYl8wHskVKw=="
 	const org = "jbd"
@@ -21,7 +26,7 @@ func initData() {
 	writeAPI = client.WriteAPIBlocking(org, bucket)
 }
 
-func pushTo(data *mods.JbdData) {
+func PushTo(data *mods.JbdData) {
 	p := influxdb2.NewPointWithMeasurement("jbd_data").
 		AddField("current", data.Current).
 		AddField("volts", data.Volts).
@@ -32,6 +37,4 @@ func pushTo(data *mods.JbdData) {
 	if err := writeAPI.WritePoint(context.Background(), p); err != nil {
 		log.Errorf("Error writing point to InfluxDB: %v", err)
 	}
-
-	//log.Infof("Data written successfully!")
 }
