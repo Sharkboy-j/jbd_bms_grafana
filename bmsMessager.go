@@ -63,12 +63,6 @@ func writerChan() {
 				break
 			}
 
-			if errors.Is(err, AsyncStatus3Error) {
-				disconnect()
-
-				break
-			}
-
 			log.Errorf("unknown error %s :%v", reflect.TypeOf(err).String(), err.Error())
 			errCount++
 			if errCount > 4 {
