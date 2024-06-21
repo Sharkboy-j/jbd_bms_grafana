@@ -13,6 +13,7 @@ import (
 
 func writerChan() {
 	errCount := 0
+	log.Debugf("start write cycle")
 
 	for {
 		if app.Canceled {

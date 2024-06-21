@@ -164,6 +164,7 @@ func connect() bool {
 
 		return false
 	}
+	log.Debugf("nofigications enabled")
 
 	return true
 }
