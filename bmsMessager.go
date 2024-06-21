@@ -12,6 +12,24 @@ import (
 	"time"
 )
 
+var (
+	lastSendTime time.Time
+	isWrited     = false
+)
+
+func timeoutCheck() {
+	for {
+		if isWrited {
+			if time.Since(lastSendTime).Seconds() >= 10 {
+				log.Debugf("!!write timeout!!")
+				msgWG.Done()
+			}
+		}
+
+		time.Sleep(time.Second * 5)
+	}
+}
+
 func writerChan() {
 	errCount := 0
 	log.Debugf("start write cycle")
@@ -22,6 +40,9 @@ func writerChan() {
 		}
 
 		resp, err := txChars.WriteWithoutResponse(ReadMessage)
+		isWrited = true
+		lastSendTime = time.Now()
+
 		log.Debugf("writed")
 		msgWG.Add(1)
 
@@ -57,6 +78,7 @@ func writerChan() {
 		}
 
 		msgWG.Wait()
+		isWrited = false
 
 		time.Sleep(3 * time.Second)
 	}

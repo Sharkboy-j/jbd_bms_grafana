@@ -80,6 +80,8 @@ func main() {
 }
 
 func starty() {
+	go timeoutCheck()
+
 	for {
 		if connect() && app.Canceled == false {
 			writerChan()
