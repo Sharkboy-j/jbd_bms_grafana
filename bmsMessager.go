@@ -20,7 +20,7 @@ var (
 func timeoutCheck() {
 	for {
 		if isWrited {
-			if time.Since(lastSendTime).Seconds() >= 10 {
+			if time.Since(lastSendTime).Seconds() >= 30 {
 				log.Debugf("!!write timeout!!")
 				msgWG.Done()
 			}
