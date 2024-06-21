@@ -51,7 +51,8 @@ func writerChan() {
 		}
 
 		log.Debugf("wait chan")
-		<-MSGcH
+		msgWG.Wait()
+
 		time.Sleep(3 * time.Second)
 	}
 }
@@ -64,7 +65,7 @@ func recCallb(buf []byte) {
 		parseData()
 		buff = nil
 		log.Debugf("release chan")
-		MSGcH <- true
+		msgWG.Done()
 	} else {
 		buff = append(buff, buf...)
 	}

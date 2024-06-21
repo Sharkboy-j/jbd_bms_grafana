@@ -9,6 +9,7 @@ import (
 	"github.com/akamensky/argparse"
 	"runtime"
 	"runtime/debug"
+	"sync"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
@@ -28,7 +29,7 @@ var (
 	AsyncStatus3Error = errors.New("async operation failed with status 3")
 	ReadMessage       = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
 	bmsData           = &mods.JbdData{}
-	MSGcH             = make(chan bool, 1)
+	msgWG             = new(sync.WaitGroup)
 )
 
 const StartBit byte = 0xDD
@@ -45,6 +46,7 @@ func main() {
 	debug.SetGCPercent(10)
 	done := make(chan bool, 1)
 	defer handlePanic()
+	msgWG.Add(1)
 
 	log = logger.New()
 	//ctx = app.SigTermIntCtx()
