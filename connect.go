@@ -175,6 +175,8 @@ func notify(buf []byte) {
 		buff = append(buff, buf...)
 		parseData()
 		buff = nil
+		log.Debugf("release chan")
+		MSGcH <- true
 	} else {
 		buff = append(buff, buf...)
 	}

@@ -30,6 +30,7 @@ var (
 	ReadMessage       = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
 	bmsData           = &JbdData{}
 	lastInd           = 0
+	MSGcH             = make(chan bool, 1)
 )
 
 const startBit byte = 0xDD
@@ -87,6 +88,8 @@ func starty() {
 	for {
 		if connect() && app.Canceled == false {
 			writerChan()
+			log.Debugf("wait chan")
+			<-MSGcH
 		}
 
 		if app.Canceled {
