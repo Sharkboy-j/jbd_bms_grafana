@@ -3,11 +3,10 @@ package main
 import (
 	"bleTest/app"
 	"bleTest/logger"
-	"encoding/hex"
+	"bleTest/mods"
 	"errors"
 	"fmt"
 	"github.com/akamensky/argparse"
-	"github.com/godbus/dbus/v5"
 	"runtime"
 	"runtime/debug"
 	"time"
@@ -28,13 +27,12 @@ var (
 	NotConnectedError = errors.New("Not connected")
 	AsyncStatus3Error = errors.New("async operation failed with status 3")
 	ReadMessage       = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
-	bmsData           = &JbdData{}
-	lastInd           = 0
+	bmsData           = &mods.JbdData{}
 	MSGcH             = make(chan bool, 1)
 )
 
-const startBit byte = 0xDD
-const stopBit byte = 0x77
+const StartBit byte = 0xDD
+const StopBit byte = 0x77
 
 func handlePanic() {
 	if r := recover(); r != nil {
@@ -74,11 +72,6 @@ func main() {
 
 	go starty()
 
-	//for {
-	//	log.Debugf(time.Now().String())
-	//	time.Sleep(time.Second * 1)
-	//}
-
 	<-done
 
 	log.Debugf("Exiting application.")
@@ -108,84 +101,4 @@ func disconnect() {
 		log.Errorf("Error enabling notifications: %v", err)
 	}
 
-}
-
-func writerChan() {
-	errCount := 0
-
-	for {
-		if app.Canceled {
-			break
-		}
-
-		resp, err := txChars.WriteWithoutResponse(ReadMessage)
-		if resp == 0 && err != nil {
-			var customErr *dbus.Error
-			if errors.As(err, &customErr) {
-				if customErr.Error() == NotConnectedError.Error() {
-					log.Errorf(fmt.Errorf("not connected error").Error())
-					disconnect()
-
-					break
-				} else {
-					log.Errorf(fmt.Errorf("custom error: %v", customErr.Error()).Error())
-				}
-			} else {
-				if errors.Is(err, AsyncStatus3Error) {
-					disconnect()
-
-					break
-				}
-			}
-
-			log.Errorf(err.Error())
-			errCount++
-		} else {
-			errCount = 0
-		}
-
-		if errCount > 4 {
-			break
-		}
-
-		log.Debugf("wait chan")
-		<-MSGcH
-		time.Sleep(3 * time.Second)
-	}
-}
-
-func parseData() {
-	if isValid() {
-		log.Debugf("data: %s %d", hex.EncodeToString(buff), len(buff))
-		if buff[1] == 0x03 && len(buff) >= 26 {
-
-			mos := getMOS(buff[24])
-			bmsData.Volts = toFloat([]byte{buff[4], buff[5]}) / 100
-			bmsData.Current = toFloat([]byte{buff[6], buff[7]}) / 100
-			bmsData.RemainingCapacity = toFloat([]byte{buff[8], buff[9]}) / 100
-			bmsData.NominalCapcity = toFloat([]byte{buff[10], buff[11]}) / 100
-			bmsData.Cycles = toFloat([]byte{buff[12], buff[13]})
-			bmsData.Version = toVersion(buff[22])
-			bmsData.RemainingPercent = toPercents(buff[23])
-			bmsData.Series = toInt(buff[25])
-			//Temp:              toFloat(),
-			bmsData.MosChargingEnabled = mos.Charging
-			bmsData.MosDischargingEnabled = mos.Discharging
-
-			temp := make([]float32, int(buff[26]))
-			for i := 0; i < int(buff[26]); i++ {
-				temperature := (float32(buff[27+i*2])*256 + float32(buff[28+i*2]) - 2731) / 10
-				temp = append(temp, temperature)
-			}
-			bmsData.Temp = temp
-
-			//clearConsole()
-			//log.Debugf(bmsData.String())
-			pushTo(bmsData)
-		}
-	}
-}
-
-func isValid() bool {
-	return buff[0] == startBit && buff[len(buff)-1] == stopBit
 }

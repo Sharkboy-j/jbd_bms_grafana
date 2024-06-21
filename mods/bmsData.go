@@ -1,6 +1,11 @@
-package main
+package mods
 
-import "fmt"
+import (
+	"fmt"
+)
+
+const StartBit byte = 0xDD
+const StopBit byte = 0x77
 
 type MOSStatus struct {
 	Charging    bool
@@ -20,6 +25,10 @@ type JbdData struct {
 	Temp                  []float32
 	MosChargingEnabled    bool
 	MosDischargingEnabled bool
+}
+
+func IsValid(buff []byte) bool {
+	return buff[0] == StartBit && buff[len(buff)-1] == StopBit
 }
 
 func (b JbdData) String() string {

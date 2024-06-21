@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bleTest/mods"
 	"context"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
@@ -20,7 +21,7 @@ func initData() {
 	writeAPI = client.WriteAPIBlocking(org, bucket)
 }
 
-func pushTo(data *JbdData) {
+func pushTo(data *mods.JbdData) {
 	p := influxdb2.NewPointWithMeasurement("jbd_data").
 		AddField("current", data.Current).
 		AddField("volts", data.Volts).

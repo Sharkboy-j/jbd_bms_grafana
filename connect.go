@@ -157,7 +157,7 @@ func connect() bool {
 	txChars = &tx[0]
 	rxChars = &rx[0]
 
-	err = rxChars.EnableNotifications(notify)
+	err = rxChars.EnableNotifications(recCallb)
 	if err != nil {
 		log.Errorf(err.Error())
 		disconnect()
@@ -166,18 +166,4 @@ func connect() bool {
 	}
 
 	return true
-}
-
-func notify(buf []byte) {
-	if buf[0] == startBit {
-		buff = buf
-	} else if buf[len(buf)-1] == stopBit {
-		buff = append(buff, buf...)
-		parseData()
-		buff = nil
-		log.Debugf("release chan")
-		MSGcH <- true
-	} else {
-		buff = append(buff, buf...)
-	}
 }
