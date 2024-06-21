@@ -26,8 +26,9 @@ func writerChan() {
 		msgWG.Add(1)
 
 		if resp == 0 && err != nil {
-			var customErr *dbus.Error
+			var customErr dbus.Error
 			if errors.As(err, &customErr) {
+				log.Debugf("error is *dbus.Error")
 				if customErr.Error() == NotConnectedError.Error() {
 					log.Errorf(fmt.Errorf("not connected error").Error())
 					disconnect()
@@ -36,22 +37,23 @@ func writerChan() {
 				} else {
 					log.Errorf(fmt.Errorf("custom error: %v", customErr.Error()).Error())
 				}
-			} else {
-				if errors.Is(err, AsyncStatus3Error) {
-					disconnect()
-
-					break
-				}
 			}
 
-			log.Errorf("unknown error %s :%v", reflect.TypeOf(err).String(), err.Error())
+			if errors.Is(err, AsyncStatus3Error) {
+				disconnect()
+
+				break
+			} else {
+				log.Errorf("unknown error %s :%v", reflect.TypeOf(err).String(), err.Error())
+			}
 			errCount++
+			if errCount > 4 {
+				break
+			}
+
+			continue
 		} else {
 			errCount = 0
-		}
-
-		if errCount > 4 {
-			break
 		}
 
 		msgWG.Wait()
