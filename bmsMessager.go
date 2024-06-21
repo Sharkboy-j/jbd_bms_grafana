@@ -63,10 +63,10 @@ func writerChan() {
 func recCallb(buf []byte) {
 	if buf[0] == StartBit {
 		buff = buf
-		log.Debugf("WTF: %s %d", hex.EncodeToString(buf), len(buf))
+		log.Debugf("start WTF: %s %d", hex.EncodeToString(buf), len(buf))
 
 	} else if buf[len(buf)-1] == StopBit {
-		log.Debugf("WTF: %s %d", hex.EncodeToString(buf), len(buf))
+		log.Debugf("body WTF: %s %d", hex.EncodeToString(buf), len(buf))
 
 		buff = append(buff, buf...)
 		log.Debugf("read end")
@@ -75,7 +75,7 @@ func recCallb(buf []byte) {
 		log.Debugf("release chan")
 		msgWG.Done()
 	} else {
-		log.Debugf("WTF: %s %d", hex.EncodeToString(buf), len(buf))
+		log.Debugf("end WTF: %s %d", hex.EncodeToString(buf), len(buf))
 		buff = append(buff, buf...)
 	}
 }
