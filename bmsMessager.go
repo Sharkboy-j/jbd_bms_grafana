@@ -63,17 +63,14 @@ func writerChan() {
 func recCallb(buf []byte) {
 	if buf[0] == StartBit {
 		buff = buf
-		log.Debugf("read start")
 	} else if buf[len(buf)-1] == StopBit {
 		buff = append(buff, buf...)
 		log.Debugf("read end")
-		parseData()
+		go parseData()
 		buff = nil
 		log.Debugf("release chan")
 		msgWG.Done()
 	} else {
-		log.Debugf("body")
-
 		buff = append(buff, buf...)
 	}
 }
