@@ -41,13 +41,13 @@ func writerChan() {
 			break
 		}
 		log.Debugf("==========================================================================================")
-		log.Debugf("writed: %s %d", hex.EncodeToString(ReadMessage), len(ReadMessage))
 
 		resp, err := txChars.WriteWithoutResponse(ReadMessage)
+		log.Debugf("writed: %s %d", hex.EncodeToString(ReadMessage), len(ReadMessage))
+
 		isWrited = true
 		lastSendTime = time.Now()
 
-		log.Debugf("writed")
 		msgWG.Add(1)
 
 		if resp == 0 && err != nil {
