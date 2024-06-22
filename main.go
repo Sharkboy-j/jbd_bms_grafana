@@ -83,25 +83,20 @@ func main() {
 func starty() {
 	go timeoutCheck()
 
-	for {
-		if connect() && app.Canceled == false {
-			writerChan()
-		}
-
-		if app.Canceled {
-			break
-		} else {
-			time.Sleep(3 * time.Second)
-		}
+	if connect() && app.Canceled == false {
+		writerChan()
 	}
+
+	time.Sleep(3 * time.Second)
 }
 
 func disconnect() {
-	isWrited = false
-	err := device.Disconnect()
-	if err != nil {
-		Log.Errorf("Error disconnecting device: %v", err)
-	}
+	panic("restart due to shit")
+	//isWrited = false
+	//err := device.Disconnect()
+	//if err != nil {
+	//	Log.Errorf("Error disconnecting device: %v", err)
+	//}
 	//err = rxChars.EnableNotifications(nil)
 	//if err != nil {
 	//	Log.Errorf("Error enabling notifications: %v", err)
