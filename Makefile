@@ -1,3 +1,6 @@
+.PHONY: pull
+pull:
+	git pull
 .PHONY: build
 build:
 	git pull
