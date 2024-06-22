@@ -88,10 +88,11 @@ func recCallb(buf []byte) {
 	} else if buf[len(buf)-1] == StopBit {
 		//log.Debugf("body WTF: %s %d", hex.EncodeToString(buf), len(buf))
 		buff = append(buff, buf...)
+		log.Debugf("data: %s %d", hex.EncodeToString(buff), len(buff))
+
 		go parseData(buff)
 		buff = nil
 		log.Debugf("release chan")
-
 		msgWG.Done()
 	} else {
 		buff = append(buff, buf...)
