@@ -40,7 +40,7 @@ func writerChan() {
 		if app.Canceled {
 			break
 		}
-		log.Debugf("==========================================================================================")
+		log.Debugf("==================================================================================================================================")
 
 		resp, err := txChars.WriteWithoutResponse(ReadMessage)
 		log.Debugf("writed: %s %d", hex.EncodeToString(ReadMessage), len(ReadMessage))
@@ -95,7 +95,7 @@ func recCallb(buf []byte) {
 		go parseData(buff)
 		buff = nil
 		log.Debugf("release chan")
-		log.Debugf("==========================================================================================")
+		log.Debugf("==================================================================================================================================")
 		msgWG.Done()
 	} else {
 		buff = append(buff, buf...)
