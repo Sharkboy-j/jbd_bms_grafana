@@ -76,6 +76,7 @@ func writerChan() {
 			errCount = 0
 		}
 
+		log.Debugf("wait chan...")
 		msgWG.Wait()
 		isWrited = false
 
