@@ -59,9 +59,9 @@ func connect() bool {
 
 		device, err = adapter.Connect(result.Address, bluetooth.ConnectionParams{
 			ConnectionTimeout: bluetooth.NewDuration(time.Second * 30),
-			MinInterval:       bluetooth.NewDuration(495 * time.Millisecond),
-			MaxInterval:       bluetooth.NewDuration(510 * time.Millisecond),
-			Timeout:           bluetooth.NewDuration(10 * time.Second),
+			MinInterval:       bluetooth.NewDuration(50 * time.Millisecond),
+			MaxInterval:       bluetooth.NewDuration(100 * time.Millisecond),
+			Timeout:           bluetooth.NewDuration(4 * time.Second),
 		})
 
 		if err != nil {
