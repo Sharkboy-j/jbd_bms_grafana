@@ -13,40 +13,40 @@ var (
 )
 
 func connect() bool {
-	log.Infof("enable BLE")
+	Log.Infof("enable BLE")
 
 	err := adapter.Enable()
 	if err != nil {
-		log.Errorf(err.Error())
+		Log.Errorf(err.Error())
 		time.Sleep(time.Second * 3)
 
 		return false
 	}
 
 	ch := make(chan *bluetooth.ScanResult, 1)
-	log.Infof("scanning...")
+	Log.Infof("scanning...")
 	go func() {
 		err := adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
 			if app.Canceled {
 
 				err = adapter.StopScan()
 				if err != nil {
-					log.Errorf(err.Error())
+					Log.Errorf(err.Error())
 				}
 				ch <- nil
 			}
 
-			log.Infof("found device:%s %d %s", result.Address.String(), result.RSSI, result.LocalName())
+			Log.Infof("found device:%s %d %s", result.Address.String(), result.RSSI, result.LocalName())
 			if result.Address.String() == devAdress.String() {
 				err = adapter.StopScan()
 				if err != nil {
-					log.Errorf(err.Error())
+					Log.Errorf(err.Error())
 				}
 				ch <- &result
 			}
 		})
 		if err != nil {
-			log.Errorf(err.Error())
+			Log.Errorf(err.Error())
 		}
 	}()
 
@@ -66,10 +66,10 @@ func connect() bool {
 
 		if err != nil {
 			if err.Error() == conErr.Error() {
-				log.Errorf(fmt.Sprintf("%s not found", devAdress.String()))
+				Log.Errorf(fmt.Sprintf("%s not found", devAdress.String()))
 				time.Sleep(time.Second * 3)
 			} else {
-				log.Errorf(err.Error())
+				Log.Errorf(err.Error())
 
 				return false
 			}
@@ -78,7 +78,7 @@ func connect() bool {
 		}
 	}
 
-	log.Infof("connected: %s", devAdress.String())
+	Log.Infof("connected: %s", devAdress.String())
 
 	srvUid, err := bluetooth.ParseUUID(serviceUUIDString)
 	txUid, err := bluetooth.ParseUUID(txUUIDString)
@@ -92,11 +92,11 @@ func connect() bool {
 			return false
 		}
 
-		log.Infof("discovering services/characteristics")
+		Log.Infof("discovering services/characteristics")
 		services, err = device.DiscoverServices([]bluetooth.UUID{srvUid})
 		if err != nil {
 			errCount++
-			log.Errorf("%d %v", errCount, err.Error())
+			Log.Errorf("%d %v", errCount, err.Error())
 
 			if errCount > 10 {
 				disconnect()
@@ -111,7 +111,7 @@ func connect() bool {
 	}
 
 	if len(services) == 0 {
-		log.Errorf("could not find services")
+		Log.Errorf("could not find services")
 		disconnect()
 		time.Sleep(time.Second * 3)
 
@@ -119,11 +119,11 @@ func connect() bool {
 	}
 	service = &services[0]
 
-	log.Infof("found servicec: %s", service.UUID().String())
+	Log.Infof("found servicec: %s", service.UUID().String())
 
 	rx, err := service.DiscoverCharacteristics([]bluetooth.UUID{rxUid})
 	if err != nil {
-		log.Error(err)
+		Log.Error(err)
 		disconnect()
 		time.Sleep(time.Second * 3)
 
@@ -131,7 +131,7 @@ func connect() bool {
 	}
 
 	if len(rx) == 0 {
-		log.Errorf("could not get rx chan")
+		Log.Errorf("could not get rx chan")
 		disconnect()
 		time.Sleep(time.Second * 3)
 
@@ -140,14 +140,14 @@ func connect() bool {
 
 	tx, err := service.DiscoverCharacteristics([]bluetooth.UUID{txUid})
 	if err != nil {
-		log.Errorf(err.Error())
+		Log.Errorf(err.Error())
 		disconnect()
 		time.Sleep(time.Second * 3)
 
 		return false
 	}
 	if len(tx) == 0 {
-		log.Errorf("could not tx characteristic")
+		Log.Errorf("could not tx characteristic")
 		disconnect()
 		time.Sleep(time.Second * 3)
 
@@ -159,12 +159,12 @@ func connect() bool {
 
 	err = rxChars.EnableNotifications(recCallb)
 	if err != nil {
-		log.Errorf(err.Error())
+		Log.Errorf(err.Error())
 		disconnect()
 
 		return false
 	}
-	log.Debugf("nofigications enabled")
+	Log.Debugf("nofigications enabled")
 
 	return true
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bleTest/app"
+	"bleTest/bluetoothHelper"
 	"bleTest/influx"
 	"bleTest/logger"
 	"bleTest/mods"
@@ -25,7 +26,7 @@ var (
 	txChars           *bluetooth.DeviceCharacteristic
 	devAdress         *bluetooth.Address
 	service           *bluetooth.DeviceService
-	log               *logger.Logger
+	Log               *logger.Logger
 	NotConnectedError = errors.New("Not connected")
 	AsyncStatus3Error = errors.New("async operation failed with status 3")
 	ReadMessage       = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
@@ -38,7 +39,7 @@ const StopBit byte = 0x77
 
 func handlePanic() {
 	if r := recover(); r != nil {
-		log.Debugf("Recovered from panic: %v", r)
+		Log.Debugf("Recovered from panic: %v", r)
 		// Perform any cleanup or logging here
 	}
 }
@@ -48,7 +49,7 @@ func main() {
 	done := make(chan bool, 1)
 	defer handlePanic()
 
-	log = logger.New()
+	Log = logger.New()
 	//ctx = app.SigTermIntCtx()
 
 	parser := argparse.NewParser("print", "Prints provided string to stdout")
@@ -61,22 +62,22 @@ func main() {
 
 	switch runtime.GOOS {
 	case "windows", "linux", "baremetal":
-		devAdress = getAdress(*s)
+		devAdress = bluetoothHelper.GetAdress(Log, *s)
 	case "darwin":
 		str := "59d9d8cf-7dc9-2f43-ab65-dc2907a5fc4d"
 		u = &str
 
-		devAdress = getAdress(*u)
+		devAdress = bluetoothHelper.GetAdress(Log, *u)
 	default:
 		fmt.Printf("Current platform is %s\n", runtime.GOOS)
 	}
-	influx.Init(log)
+	influx.Init(Log)
 
 	go starty()
 
 	<-done
 
-	log.Debugf("Exiting application.")
+	Log.Debugf("Exiting application.")
 }
 
 func starty() {
@@ -96,13 +97,14 @@ func starty() {
 }
 
 func disconnect() {
+	isWrited = false
 	err := device.Disconnect()
 	if err != nil {
-		log.Errorf("Error disconnecting device: %v", err)
+		Log.Errorf("Error disconnecting device: %v", err)
 	}
 	err = rxChars.EnableNotifications(nil)
 	if err != nil {
-		log.Errorf("Error enabling notifications: %v", err)
+		Log.Errorf("Error enabling notifications: %v", err)
 	}
 
 }

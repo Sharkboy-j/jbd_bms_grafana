@@ -18,12 +18,12 @@ var (
 )
 
 func timeoutCheck() {
-	log.Debugf("timeout check started")
+	Log.Debugf("timeout check started")
 
 	for {
 		if isWrited {
 			if time.Since(lastSendTime).Seconds() >= 30 {
-				log.Debugf("!!write timeout!!")
+				Log.Debugf("!!write timeout!!")
 				msgWG.Done()
 			}
 		}
@@ -34,16 +34,16 @@ func timeoutCheck() {
 
 func writerChan() {
 	errCount := 0
-	log.Debugf("start write cycle")
+	Log.Debugf("start write cycle")
 
 	for {
 		if app.Canceled {
 			break
 		}
-		log.Debugf("==================================================================================================================================")
+		Log.Debugf("==================================================================================================================================")
 
 		resp, err := txChars.WriteWithoutResponse(ReadMessage)
-		log.Debugf("Writed: %s %d", hex.EncodeToString(ReadMessage), len(ReadMessage))
+		Log.Debugf("Writed: %s %d", hex.EncodeToString(ReadMessage), len(ReadMessage))
 
 		isWrited = true
 		lastSendTime = time.Now()
@@ -53,19 +53,19 @@ func writerChan() {
 		if resp == 0 && err != nil {
 			var customErr dbus.Error
 			if errors.As(err, &customErr) {
-				log.Debugf("error is *dbus.Error")
+				Log.Debugf("error is *dbus.Error")
 
 				if customErr.Error() == NotConnectedError.Error() {
-					log.Errorf(fmt.Errorf("not connected error").Error())
+					Log.Errorf(fmt.Errorf("not connected error").Error())
 				}
 
-				log.Errorf(fmt.Errorf("custom error: %v", customErr.Error()).Error())
+				Log.Errorf(fmt.Errorf("custom error: %v", customErr.Error()).Error())
 
 				disconnect()
 				break
 			}
 
-			log.Errorf("unknown error %s :%v", reflect.TypeOf(err).String(), err.Error())
+			Log.Errorf("unknown error %s :%v", reflect.TypeOf(err).String(), err.Error())
 			errCount++
 			if errCount > 4 {
 				break
@@ -76,7 +76,7 @@ func writerChan() {
 			errCount = 0
 		}
 
-		log.Debugf("wait chan...")
+		Log.Debugf("wait chan...")
 		msgWG.Wait()
 		isWrited = false
 
@@ -91,12 +91,12 @@ func recCallb(buf []byte) {
 	} else if buf[len(buf)-1] == StopBit {
 		//log.Debugf("body WTF: %s %d", hex.EncodeToString(buf), len(buf))
 		buff = append(buff, buf...)
-		log.Debugf("Received: %s %d", hex.EncodeToString(buff), len(buff))
+		Log.Debugf("Received: %s %d", hex.EncodeToString(buff), len(buff))
 
 		go parseData(buff)
 		buff = nil
-		log.Debugf("release chan")
-		log.Debugf("==================================================================================================================================")
+		Log.Debugf("release chan")
+		Log.Debugf("==================================================================================================================================")
 		msgWG.Done()
 	} else {
 		buff = append(buff, buf...)

@@ -1,12 +1,12 @@
 //go:build darwin
 
-package main
+package bluetoothHelper
 
 import (
 	"tinygo.org/x/bluetooth"
 )
 
-func getAdress(address string) *bluetooth.Address {
+func GetAdress(log *logger.Logger, address string) *bluetooth.Address {
 	uuid, err := bluetooth.ParseUUID(address)
 	if err != nil {
 		log.Errorf("Error parsing UUID address: %v", err)
