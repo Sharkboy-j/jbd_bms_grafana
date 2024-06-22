@@ -43,7 +43,7 @@ func writerChan() {
 		log.Debugf("==================================================================================================================================")
 
 		resp, err := txChars.WriteWithoutResponse(ReadMessage)
-		log.Debugf("writed: %s %d", hex.EncodeToString(ReadMessage), len(ReadMessage))
+		log.Debugf("Writed: %s %d", hex.EncodeToString(ReadMessage), len(ReadMessage))
 
 		isWrited = true
 		lastSendTime = time.Now()
@@ -105,7 +105,6 @@ func recCallb(buf []byte) {
 
 func parseData(data []byte) {
 	if mods.IsValid(data) {
-		log.Debugf("data: %s %d", hex.EncodeToString(data), len(data))
 		if data[1] == 0x03 && len(data) >= 26 {
 
 			mos := mods.GetMOS(data[24])
