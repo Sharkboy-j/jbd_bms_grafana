@@ -41,6 +41,7 @@ func writerChan() {
 			break
 		}
 		log.Debugf("==========================================================================================")
+		log.Debugf("writed: %s %d", hex.EncodeToString(ReadMessage), len(ReadMessage))
 
 		resp, err := txChars.WriteWithoutResponse(ReadMessage)
 		isWrited = true
@@ -89,7 +90,7 @@ func recCallb(buf []byte) {
 	} else if buf[len(buf)-1] == StopBit {
 		//log.Debugf("body WTF: %s %d", hex.EncodeToString(buf), len(buf))
 		buff = append(buff, buf...)
-		log.Debugf("data: %s %d", hex.EncodeToString(buff), len(buff))
+		log.Debugf("Received: %s %d", hex.EncodeToString(buff), len(buff))
 
 		go parseData(buff)
 		buff = nil
