@@ -102,9 +102,9 @@ func disconnect() {
 	if err != nil {
 		Log.Errorf("Error disconnecting device: %v", err)
 	}
-	err = rxChars.EnableNotifications(nil)
-	if err != nil {
-		Log.Errorf("Error enabling notifications: %v", err)
-	}
+	//err = rxChars.EnableNotifications(nil)
+	//if err != nil {
+	//	Log.Errorf("Error enabling notifications: %v", err)
+	//}
 
 }
