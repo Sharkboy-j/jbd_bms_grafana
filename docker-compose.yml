@@ -1,0 +1,17 @@
+version: "2.1"
+services:
+  bms:
+    image: bms
+    container_name: bms
+    environment:
+      - PUID=1026
+      - PGID=100
+    read_only: false
+    stop_grace_period: 30m
+    network_mode: "host"
+    tmpfs:
+      - /tmp
+    tty: true
+    restart: unless-stopped
+    volumes:
+      - /var/run/dbus/:/var/run/dbus/
