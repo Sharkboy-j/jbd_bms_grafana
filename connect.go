@@ -52,6 +52,7 @@ func connect() bool {
 
 	result := <-ch
 
+	Log.Debugf("try connect")
 	for {
 		if app.Canceled {
 			return false
@@ -65,14 +66,9 @@ func connect() bool {
 		})
 
 		if err != nil {
-			if err.Error() == conErr.Error() {
-				Log.Errorf(fmt.Sprintf("%s not found", devAdress.String()))
-				time.Sleep(time.Second * 3)
-			} else {
-				Log.Errorf(err.Error())
+			Log.Errorf(err.Error())
 
-				return false
-			}
+			disconnect()
 		} else {
 			break
 		}
