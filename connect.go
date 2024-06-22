@@ -157,14 +157,16 @@ func connect() bool {
 	txChars = &tx[0]
 	rxChars = &rx[0]
 
-	err = rxChars.EnableNotifications(recCallb)
-	if err != nil {
-		Log.Errorf(err.Error())
-		disconnect()
+	if isRecCallbEnabled == false {
+		err = rxChars.EnableNotifications(recCallb)
+		if err != nil {
+			Log.Errorf(err.Error())
+			disconnect()
 
-		return false
+			return false
+		}
+		Log.Debugf("nofigications enabled")
 	}
-	Log.Debugf("nofigications enabled")
 
 	return true
 }

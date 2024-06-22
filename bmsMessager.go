@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	lastSendTime time.Time
-	isWrited     = false
+	lastSendTime      time.Time
+	isWrited          = false
+	isRecCallbEnabled = false
 )
 
 func timeoutCheck() {
@@ -22,7 +23,7 @@ func timeoutCheck() {
 
 	for {
 		if isWrited {
-			if time.Since(lastSendTime).Seconds() >= 30 {
+			if time.Since(lastSendTime).Seconds() >= 15 {
 				Log.Debugf("!!write timeout!!")
 				msgWG.Done()
 			}
