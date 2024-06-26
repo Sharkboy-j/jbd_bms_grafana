@@ -24,8 +24,31 @@ type JbdData struct {
 	Series                int32
 	Temp                  []float32
 	Cells                 []float32
+	Diff                  float32
+	MinCell               float32
+	MaxCell               float32
 	MosChargingEnabled    bool
 	MosDischargingEnabled bool
+}
+
+func (b JbdData) GetMaxMin() (max float32, min float32) {
+	if len(b.Cells) == 0 {
+		return 0, 0 // return NaN if the slice is empty
+	}
+
+	max = b.Cells[0]
+	min = b.Cells[0]
+
+	for _, value := range b.Cells {
+		if value > max {
+			max = value
+		}
+		if value < min {
+			min = value
+		}
+	}
+
+	return max, min
 }
 
 func IsValid(buff []byte) bool {

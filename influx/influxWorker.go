@@ -37,7 +37,7 @@ func PushData(data *mods.JbdData) {
 	for i, v := range data.Temp {
 		p.AddField("temp"+strconv.Itoa(i), v)
 	}
-	
+
 	p.SetTime(time.Now())
 
 	if err := writeAPI.WritePoint(context.Background(), p); err != nil {
@@ -52,7 +52,10 @@ func PushCells(data *mods.JbdData) {
 		p.AddField("cell"+strconv.Itoa(i), v)
 	}
 
-	p.SetTime(time.Now())
+	p.AddField("maxCell", data.MaxCell).
+		AddField("minCell", data.MinCell).
+		AddField("diff", data.Diff).
+		SetTime(time.Now())
 
 	if err := writeAPI.WritePoint(context.Background(), p); err != nil {
 		log.Errorf("Error writing point to InfluxDB: %v", err)

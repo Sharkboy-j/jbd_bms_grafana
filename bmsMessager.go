@@ -117,6 +117,17 @@ func recCallb(buf []byte) {
 	}
 }
 
+func getChecksumForReceivedData(data []byte) uint16 {
+	checksum := 0x10000
+	dataLengthProvided := int(data[3])
+
+	for i := 0; i < dataLengthProvided+1; i++ {
+		checksum -= int(data[i+3]) // offset to the data length byte is 3, checksum is calculated from there
+	}
+
+	return uint16(checksum)
+}
+
 func parseData(data []byte) {
 	if mods.IsValid(data) {
 		if data[1] == 0x03 {
@@ -156,6 +167,9 @@ func parseData(data []byte) {
 				bmsData.Cells[i] = volts
 				//fmt.Printf("Cell %d: %1.3fV\n", i+1, volts)
 			}
+
+			bmsData.MaxCell, bmsData.MinCell = bmsData.GetMaxMin()
+			bmsData.Diff = bmsData.MaxCell - bmsData.MinCell
 
 			influx.PushCells(bmsData)
 		}
