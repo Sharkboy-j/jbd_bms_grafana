@@ -88,9 +88,12 @@ func writerChan() {
 		Log.Debugf("wait chan...")
 		msgWG.Wait()
 		isWrited = false
-		ticker++
 
-		time.Sleep(3 * time.Second)
+		if ticker%2 != 0 {
+			time.Sleep(3 * time.Second)
+		}
+
+		ticker++
 	}
 }
 
@@ -127,7 +130,6 @@ func parseData(data []byte) {
 			bmsData.Version = mods.ToVersion(data[22])
 			bmsData.RemainingPercent = mods.ToPercents(data[23])
 			bmsData.Series = mods.ToInt(data[25])
-			//Temp:              toFloat(),
 			bmsData.MosChargingEnabled = mos.Charging
 			bmsData.MosDischargingEnabled = mos.Discharging
 
