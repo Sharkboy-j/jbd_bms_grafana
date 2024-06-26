@@ -30,6 +30,7 @@ var (
 	NotConnectedError = errors.New("Not connected")
 	AsyncStatus3Error = errors.New("async operation failed with status 3")
 	ReadMessage       = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
+	ReadCellMessage   = []byte{0xdd, 0xa5, 0x4, 0x0, 0xff, 0xfc, 0x77}
 	bmsData           = &mods.JbdData{}
 	msgWG             = new(sync.WaitGroup)
 )

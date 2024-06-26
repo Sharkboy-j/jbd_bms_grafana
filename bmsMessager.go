@@ -15,6 +15,7 @@ import (
 var (
 	lastSendTime time.Time
 	isWrited     = false
+	ticker       = 0
 )
 
 func timeoutCheck() {
@@ -38,14 +39,20 @@ func writerChan() {
 	errCount := 0
 	Log.Debugf("start write cycle")
 
+	msg := ReadMessage
 	for {
 		if app.Canceled {
 			break
 		}
 		Log.Debugf("==================================================================================================================================")
+		if ticker%2 == 0 {
+			msg = ReadMessage
+		} else {
+			msg = ReadCellMessage
+		}
 
-		resp, err := txChars.WriteWithoutResponse(ReadMessage)
-		Log.Debugf("Writed: %s %d", hex.EncodeToString(ReadMessage), len(ReadMessage))
+		resp, err := txChars.WriteWithoutResponse(msg)
+		Log.Debugf("Writed: %s %d", hex.EncodeToString(msg), len(msg))
 
 		isWrited = true
 		lastSendTime = time.Now()
@@ -81,6 +88,7 @@ func writerChan() {
 		Log.Debugf("wait chan...")
 		msgWG.Wait()
 		isWrited = false
+		ticker++
 
 		time.Sleep(3 * time.Second)
 	}
@@ -130,22 +138,26 @@ func parseData(data []byte) {
 			}
 			bmsData.Temp = temp
 
-			if data[1] == 0x04 {
-				// Calculate the number of cells
-				bmsNumberOfCells := int(data[3]) / 2
+			influx.PushData(bmsData)
 
-				bmsData.Cells = make([]float32, bmsNumberOfCells)
-				// Iterate over each cell
-				for i := 0; i < bmsNumberOfCells; i++ {
-					index := 4 + 2*i
-					millivolts := int(data[index])*256 + int(data[index+1])
-					volts := float32(millivolts) / 1000
-					bmsData.Cells[0] = volts
-					//fmt.Printf("Cell %d: %1.3fV\n", i+1, volts)
-				}
+		}
+
+		if data[1] == 0x04 {
+			// Calculate the number of cells
+			bmsNumberOfCells := int(data[3]) / 2
+
+			bmsData.Cells = make([]float32, bmsNumberOfCells)
+			// Iterate over each cell
+			for i := 0; i < bmsNumberOfCells; i++ {
+				index := 4 + 2*i
+				millivolts := int(data[index])*256 + int(data[index+1])
+				volts := float32(millivolts) / 1000
+				bmsData.Cells[0] = volts
+				//fmt.Printf("Cell %d: %1.3fV\n", i+1, volts)
 			}
 
-			influx.PushTo(bmsData)
+			influx.PushCells(bmsData)
 		}
+
 	}
 }
