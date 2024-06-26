@@ -116,7 +116,7 @@ func recCallb(buf []byte) {
 
 func parseData(data []byte) {
 	if mods.IsValid(data) {
-		if data[1] == 0x03 && len(data) >= 26 {
+		if data[1] == 0x03 {
 
 			mos := mods.GetMOS(data[24])
 			bmsData.Volts = mods.ToFloat([]byte{data[4], data[5]}) / 100
@@ -139,7 +139,6 @@ func parseData(data []byte) {
 			bmsData.Temp = temp
 
 			influx.PushData(bmsData)
-
 		}
 
 		if data[1] == 0x04 {
