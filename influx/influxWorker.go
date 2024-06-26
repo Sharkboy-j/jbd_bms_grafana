@@ -38,6 +38,10 @@ func PushTo(data *mods.JbdData) {
 		p.AddField("temp"+strconv.Itoa(i), v)
 	}
 
+	for i, v := range data.Cells {
+		p.AddField("cell"+strconv.Itoa(i), v)
+	}
+
 	p.SetTime(time.Now())
 
 	if err := writeAPI.WritePoint(context.Background(), p); err != nil {

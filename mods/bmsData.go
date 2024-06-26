@@ -23,6 +23,7 @@ type JbdData struct {
 	RemainingPercent      int
 	Series                int32
 	Temp                  []float32
+	Cells                 []float32
 	MosChargingEnabled    bool
 	MosDischargingEnabled bool
 }
