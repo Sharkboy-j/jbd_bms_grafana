@@ -94,7 +94,7 @@ func connect() bool {
 			errCount++
 			Log.Errorf("%d %v", errCount, err.Error())
 
-			if errCount > 10 {
+			if errCount > 3 {
 				disconnect()
 
 				return false
