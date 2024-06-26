@@ -151,7 +151,7 @@ func parseData(data []byte) {
 				index := 4 + 2*i
 				millivolts := int(data[index])*256 + int(data[index+1])
 				volts := float32(millivolts) / 1000
-				bmsData.Cells[0] = volts
+				bmsData.Cells[i] = volts
 				//fmt.Printf("Cell %d: %1.3fV\n", i+1, volts)
 			}
 
