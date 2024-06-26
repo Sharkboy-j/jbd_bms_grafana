@@ -6,6 +6,7 @@ import (
 	"context"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	"strconv"
 	"time"
 )
 
@@ -31,8 +32,13 @@ func PushTo(data *mods.JbdData) {
 		AddField("current", data.Current).
 		AddField("volts", data.Volts).
 		AddField("capacity", data.RemainingCapacity).
-		AddField("perc", data.RemainingPercent).
-		SetTime(time.Now())
+		AddField("perc", data.RemainingPercent)
+
+	for i, v := range data.Temp {
+		p.AddField("temp"+strconv.Itoa(i), v)
+	}
+
+	p.SetTime(time.Now())
 
 	if err := writeAPI.WritePoint(context.Background(), p); err != nil {
 		log.Errorf("Error writing point to InfluxDB: %v", err)

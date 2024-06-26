@@ -13,9 +13,8 @@ import (
 )
 
 var (
-	lastSendTime      time.Time
-	isWrited          = false
-	isRecCallbEnabled = false
+	lastSendTime time.Time
+	isWrited     = false
 )
 
 func timeoutCheck() {
