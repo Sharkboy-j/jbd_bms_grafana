@@ -153,30 +153,23 @@ func parseData(data []byte) {
 
 			totalCapacity := 38.6                          // Ёмкость аккумулятора в Ah
 			currentChargeLevel := bmsData.RemainingPercent // Текущий уровень заряда (60%)
-			fmt.Println(currentChargeLevel)
-			fmt.Println(float64(currentChargeLevel) / 100)
-			chargeCurrent := float64(bmsData.Current) // Текущий ток зарядки в A
+			chargeCurrent := float64(bmsData.Current)      // Текущий ток зарядки в A
 
-			// Расчет оставшегося времени зарядки
 			remainingTime := calculateRemainingChargingTime(totalCapacity, float64(currentChargeLevel)/100, chargeCurrent)
 			bmsData.Left = remainingTime
-			fmt.Printf("(%d|%f)Оставшееся время зарядки: %.2f часов\n", currentChargeLevel, chargeCurrent, remainingTime)
 
 			influx.PushData(bmsData)
 		}
 
 		if data[1] == 0x04 {
-			// Calculate the number of cells
 			bmsNumberOfCells := int(data[3]) / 2
 
 			bmsData.Cells = make([]float32, bmsNumberOfCells)
-			// Iterate over each cell
 			for i := 0; i < bmsNumberOfCells; i++ {
 				index := 4 + 2*i
 				millivolts := int(data[index])*256 + int(data[index+1])
 				volts := float32(millivolts) / 1000
 				bmsData.Cells[i] = volts
-				//fmt.Printf("Cell %d: %1.3fV\n", i+1, volts)
 			}
 
 			bmsData.MaxCell, bmsData.MinCell = bmsData.GetMaxMin()
