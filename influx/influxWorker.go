@@ -32,7 +32,8 @@ func PushData(data *mods.JbdData) {
 		AddField("current", data.Current).
 		AddField("volts", data.Volts).
 		AddField("capacity", data.RemainingCapacity).
-		AddField("perc", data.RemainingPercent)
+		AddField("perc", data.RemainingPercent).
+		AddField("leftTime", data.Left)
 
 	for i, v := range data.Temp {
 		p.AddField("temp"+strconv.Itoa(i), v)

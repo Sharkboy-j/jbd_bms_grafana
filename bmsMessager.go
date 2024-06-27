@@ -151,6 +151,14 @@ func parseData(data []byte) {
 			}
 			bmsData.Temp = temp
 
+			totalCapacity := 38.6                                   // Ёмкость аккумулятора в Ah
+			currentChargeLevel := float64(bmsData.RemainingPercent) // Текущий уровень заряда (60%)
+			chargeCurrent := float64(bmsData.Current)               // Текущий ток зарядки в A
+
+			// Расчет оставшегося времени зарядки
+			remainingTime := calculateRemainingChargingTime(totalCapacity, currentChargeLevel, chargeCurrent)
+			bmsData.Left = remainingTime
+
 			influx.PushData(bmsData)
 		}
 
@@ -175,4 +183,9 @@ func parseData(data []byte) {
 		}
 
 	}
+}
+
+func calculateRemainingChargingTime(totalCapacity float64, currentChargeLevel float64, chargeCurrent float64) float64 {
+	remainingCapacity := totalCapacity * (1 - currentChargeLevel)
+	return remainingCapacity / chargeCurrent
 }

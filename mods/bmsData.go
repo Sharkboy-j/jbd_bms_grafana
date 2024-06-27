@@ -29,6 +29,7 @@ type JbdData struct {
 	MaxCell               float32
 	MosChargingEnabled    bool
 	MosDischargingEnabled bool
+	Left                  float64
 }
 
 func (b JbdData) GetMaxMin() (max float32, min float32) {
