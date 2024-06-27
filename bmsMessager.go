@@ -158,6 +158,7 @@ func parseData(data []byte) {
 			// Расчет оставшегося времени зарядки
 			remainingTime := calculateRemainingChargingTime(totalCapacity, currentChargeLevel, chargeCurrent)
 			bmsData.Left = remainingTime
+			fmt.Printf("(%f|%f)Оставшееся время зарядки: %.2f часов\n", currentChargeLevel, chargeCurrent, remainingTime)
 
 			influx.PushData(bmsData)
 		}
