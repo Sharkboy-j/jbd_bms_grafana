@@ -6,6 +6,7 @@ import (
 	"context"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	"os"
 	"strconv"
 	"time"
 )
@@ -18,10 +19,10 @@ var (
 
 func Init(logger *logger.Logger) {
 	log = logger
-	const influxDBURL = "http://10.0.0.196:8086"
-	const token = "ndAzO_IU75cmGIEseZMEE9ihCYHIxn7qDkvcNlrUcw2ajWgmmt9VKcdlgFsPN8O-_FDga3kEtLnUYl8wHskVKw=="
-	const org = "jbd"
-	const bucket = "jbd"
+	influxDBURL := os.Getenv("INFLUX_DBURL")
+	token := os.Getenv("INFLUX_TOKEN")
+	org := os.Getenv("INFLUX_ORG")
+	bucket := os.Getenv("INFLUX_BUCKET")
 
 	client = influxdb2.NewClient(influxDBURL, token)
 	writeAPI = client.WriteAPIBlocking(org, bucket)
