@@ -25,7 +25,7 @@ func timeoutCheck() {
 		if isWrited {
 			if time.Since(lastSendTime).Seconds() >= 15 {
 				isWrited = false
-				Log.Debugf("!!write timeout!!")
+				Log.Debugf("!!timeout!!")
 
 				disconnect()
 			}

@@ -117,6 +117,9 @@ func connect() bool {
 
 	Log.Infof("found servicec: %s", service.UUID().String())
 
+	isWrited = true
+	lastSendTime = time.Now()
+
 	rx, err := service.DiscoverCharacteristics([]bluetooth.UUID{rxUid})
 	if err != nil {
 		Log.Error(err)
@@ -125,6 +128,8 @@ func connect() bool {
 
 		return false
 	}
+
+	lastSendTime = time.Now()
 
 	if len(rx) == 0 {
 		Log.Errorf("could not get rx chan")
@@ -142,6 +147,8 @@ func connect() bool {
 
 		return false
 	}
+	lastSendTime = time.Now()
+
 	if len(tx) == 0 {
 		Log.Errorf("could not tx characteristic")
 		disconnect()
@@ -153,6 +160,8 @@ func connect() bool {
 	txChars = &tx[0]
 	rxChars = &rx[0]
 
+	lastSendTime = time.Now()
+
 	err = rxChars.EnableNotifications(recCallb)
 	if err != nil {
 		Log.Errorf(err.Error())
@@ -161,6 +170,9 @@ func connect() bool {
 		return false
 	}
 	Log.Debugf("nofigications enabled")
+
+	lastSendTime = time.Now()
+	isWrited = false
 
 	return true
 }
