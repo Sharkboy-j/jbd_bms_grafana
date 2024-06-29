@@ -101,5 +101,5 @@ func starty() {
 
 func disconnect(err ...error) {
 	Log.Errorf("restart due to shit:")
-	panic(err)
+	panic(err[0].Error())
 }
