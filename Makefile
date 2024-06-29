@@ -21,6 +21,6 @@ run:
 
 .PHONY: build
 build:
-	git pull
+	@$(MAKE) pull
 	sudo docker build -t bms --no-cache .
 	@$(MAKE) run
