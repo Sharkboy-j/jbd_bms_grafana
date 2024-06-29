@@ -3,9 +3,8 @@ pull:
 	git pull
 .PHONY: logs
 logs:
-	@while true; do \
-        sudo docker logs -f --tail 10 bms \
-    done
+	sudo docker logs -f --tail 0 bms
+	@$(MAKE) logs
 .PHONY: build
 build:
 	git pull
