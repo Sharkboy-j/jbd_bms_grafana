@@ -5,7 +5,7 @@ services:
     container_name: bms
     environment:
       - BMS_MAC=A5:C2:37:06:1B:C9
-      - BMS_UUID=59d9d8cf-7dc9-2f43-ab65-dc2907a5fc4d
+#      - BMS_UUID=59d9d8cf-7dc9-2f43-ab65-dc2907a5fc4d
     read_only: false
     stop_grace_period: 30m
     network_mode: "host"
