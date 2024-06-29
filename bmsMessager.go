@@ -18,23 +18,6 @@ var (
 	ticker       = 0
 )
 
-func timeoutCheck() {
-	Log.Debugf("timeout check started")
-
-	for {
-		if isWrited {
-			if time.Since(lastSendTime).Seconds() >= 15 {
-				isWrited = false
-				Log.Debugf("!!timeout!!")
-
-				disconnect()
-			}
-		}
-
-		time.Sleep(time.Second * 5)
-	}
-}
-
 func writerChan() {
 	errCount := 0
 	Log.Debugf("start write cycle")
@@ -54,8 +37,7 @@ func writerChan() {
 		resp, err := txChars.WriteWithoutResponse(msg)
 		Log.Debugf("Writed: %s %d", hex.EncodeToString(msg), len(msg))
 
-		isWrited = true
-		lastSendTime = time.Now()
+		updateTimeout()
 
 		msgWG.Add(1)
 
@@ -87,7 +69,8 @@ func writerChan() {
 
 		Log.Debugf("wait chan...")
 		msgWG.Wait()
-		isWrited = false
+
+		timeoutCompleted()
 
 		if ticker%2 != 0 {
 			time.Sleep(3 * time.Second)

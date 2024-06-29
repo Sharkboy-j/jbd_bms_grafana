@@ -81,6 +81,24 @@ func main() {
 	Log.Debugf("Exiting application.")
 }
 
+func timeoutCheck() {
+	Log.Debugf("timeout check started")
+
+	for {
+		if isWrited {
+			if time.Since(lastSendTime).Seconds() >= 15 {
+				timeoutCompleted()
+
+				Log.Debugf("!!timeout!!")
+
+				disconnect()
+			}
+		}
+
+		time.Sleep(time.Second * 5)
+	}
+}
+
 func starty() {
 	go timeoutCheck()
 
@@ -93,14 +111,4 @@ func starty() {
 
 func disconnect() {
 	panic("restart due to shit")
-	//isWrited = false
-	//err := device.Disconnect()
-	//if err != nil {
-	//	Log.Errorf("Error disconnecting device: %v", err)
-	//}
-	//err = rxChars.EnableNotifications(nil)
-	//if err != nil {
-	//	Log.Errorf("Error enabling notifications: %v", err)
-	//}
-
 }

@@ -12,6 +12,16 @@ var (
 	device bluetooth.Device
 )
 
+func updateTimeout() {
+	isWrited = true
+	lastSendTime = time.Now()
+}
+
+func timeoutCompleted() {
+	isWrited = false
+	lastSendTime = time.Now()
+}
+
 func connect() bool {
 	Log.Infof("enable BLE")
 
@@ -117,8 +127,7 @@ func connect() bool {
 
 	Log.Infof("found servicec: %s", service.UUID().String())
 
-	isWrited = true
-	lastSendTime = time.Now()
+	updateTimeout()
 
 	rx, err := service.DiscoverCharacteristics([]bluetooth.UUID{rxUid})
 	if err != nil {
@@ -129,7 +138,7 @@ func connect() bool {
 		return false
 	}
 
-	lastSendTime = time.Now()
+	updateTimeout()
 
 	if len(rx) == 0 {
 		Log.Errorf("could not get rx chan")
@@ -147,7 +156,8 @@ func connect() bool {
 
 		return false
 	}
-	lastSendTime = time.Now()
+
+	updateTimeout()
 
 	if len(tx) == 0 {
 		Log.Errorf("could not tx characteristic")
@@ -160,7 +170,7 @@ func connect() bool {
 	txChars = &tx[0]
 	rxChars = &rx[0]
 
-	lastSendTime = time.Now()
+	updateTimeout()
 
 	err = rxChars.EnableNotifications(recCallb)
 	if err != nil {
@@ -171,8 +181,7 @@ func connect() bool {
 	}
 	Log.Debugf("nofigications enabled")
 
-	lastSendTime = time.Now()
-	isWrited = false
+	timeoutCompleted()
 
 	return true
 }
