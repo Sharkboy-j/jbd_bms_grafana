@@ -99,7 +99,7 @@ func starty() {
 	}
 }
 
-func disconnect(err ...any) {
+func disconnect(err ...error) {
 	Log.Errorf("restart due to shit:")
 	panic(err)
 }
