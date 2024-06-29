@@ -73,8 +73,6 @@ func findBmsDevice() bool {
 
 			disconnect(err)
 		}
-
-		println("connected to ", scanResult.Address.String())
 	}
 	updateTimeout()
 
