@@ -43,16 +43,9 @@ const (
 	uidAddrStr      = "59d9d8cf-7dc9-2f43-ab65-dc2907a5fc4d"
 )
 
-func handlePanic() {
-	if r := recover(); r != nil {
-		Log.Debugf("Recovered from panic: %v", r)
-	}
-}
-
 func main() {
 	debug.SetGCPercent(10)
 	done := make(chan bool, 1)
-	defer handlePanic()
 	Log = logger.New()
 
 	s := os.Getenv("BMS_MAC")
