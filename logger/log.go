@@ -18,7 +18,7 @@ type Logger struct {
 
 const (
 	bodyFieldName = "dump"
-	EnvLevel      = "LOG_LEVEL"
+	EnvLevel      = "4"
 )
 
 func New() *Logger {
@@ -27,7 +27,7 @@ func New() *Logger {
 	inst.SetFormatter(&logrus.TextFormatter{})
 	log.SetOutput(os.Stdout)
 
-	inst.SetLevel(logrus.DebugLevel)
+	inst.SetLevel(logrus.InfoLevel)
 	inst.Warningf("Log EnvLevel: %s", logrus.DebugLevel.String())
 
 	return &Logger{
