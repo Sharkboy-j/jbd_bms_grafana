@@ -19,9 +19,6 @@ import (
 //goland:noinspection GoErrorStringFormat
 var (
 	adapter           = *bluetooth.DefaultAdapter
-	serviceUUIDString = "0000ff00-0000-1000-8000-00805f9b34fb"
-	rxUUIDString      = "0000ff01-0000-1000-8000-00805f9b34fb"
-	txUUIDString      = "0000ff02-0000-1000-8000-00805f9b34fb"
 	buff              = make([]byte, 50)
 	rxChars           *bluetooth.DeviceCharacteristic
 	txChars           *bluetooth.DeviceCharacteristic
@@ -29,7 +26,6 @@ var (
 	service           *bluetooth.DeviceService
 	Log               *logger.Logger
 	NotConnectedError = errors.New("Not connected")
-	AsyncStatus3Error = errors.New("async operation failed with status 3")
 	ReadMessage       = []byte{0xDD, 0xA5, 0x03, 0x00, 0xFF, 0xFD, 0x77}
 	ReadCellMessage   = []byte{0xdd, 0xa5, 0x4, 0x0, 0xff, 0xfc, 0x77}
 	bmsData           = &mods.JbdData{}
@@ -37,10 +33,13 @@ var (
 )
 
 const (
-	StartBit   byte = 0xDD
-	StopBit    byte = 0x77
-	macAddrStr      = "A5:C2:37:06:1B:C9"
-	uidAddrStr      = "59d9d8cf-7dc9-2f43-ab65-dc2907a5fc4d"
+	StartBit          byte = 0xDD
+	StopBit           byte = 0x77
+	macAddrStr             = "A5:C2:37:06:1B:C9"
+	uidAddrStr             = "59d9d8cf-7dc9-2f43-ab65-dc2907a5fc4d"
+	serviceUUIDString      = "0000ff00-0000-1000-8000-00805f9b34fb"
+	rxUUIDString           = "0000ff01-0000-1000-8000-00805f9b34fb"
+	txUUIDString           = "0000ff02-0000-1000-8000-00805f9b34fb"
 )
 
 func main() {

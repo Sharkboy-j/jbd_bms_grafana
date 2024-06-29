@@ -89,15 +89,34 @@ func recCallb(buf []byte) {
 		buff = append(buff, buf...)
 		Log.Debugf("Received: %s %d", hex.EncodeToString(buff), len(buff))
 
-		go parseData(buff)
-		buff = nil
+		if getIsChecksumValidForReceivedData(buff) {
+			go parseData(buff)
+		} else {
+			Log.Debugf("wrong checksum")
+		}
+		
 		Log.Debugf("release chan")
 		Log.Debugf("==================================================================================================================================")
 		msgWG.Done()
+		buff = nil
 	} else {
 		buff = append(buff, buf...)
 		//log.Debugf("end WTF: %s %d", hex.EncodeToString(buf), len(buf))
 	}
+}
+
+func getIsChecksumValidForReceivedData(data []uint8) bool {
+	if len(data) < 5 {
+		return false // Ensure data has at least 5 elements to avoid index out of range
+	}
+
+	checksumIndex := int(data[3]) + 4
+	if checksumIndex+1 >= len(data) {
+		return false // Ensure checksumIndex and checksumIndex+1 are within bounds
+	}
+
+	receivedChecksum := uint16(data[checksumIndex])*256 + uint16(data[checksumIndex+1])
+	return getChecksumForReceivedData(data) == receivedChecksum
 }
 
 func getChecksumForReceivedData(data []byte) uint16 {
