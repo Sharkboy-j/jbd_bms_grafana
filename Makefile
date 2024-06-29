@@ -18,6 +18,7 @@ start:
 .PHONY: run
 run:
 	@$(MAKE) kill
+	@sleep 3
 	@$(MAKE) start
 	@$(MAKE) logs
 
