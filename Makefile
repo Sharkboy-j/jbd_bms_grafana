@@ -4,9 +4,7 @@ pull:
 
 .PHONY: logs
 logs:
-	sudo docker logs -f --tail 0 bms
-	@$(MAKE) logs
-
+	@./logs.sh
 .PHONY: kill
 kill:
 	sudo docker kill bms

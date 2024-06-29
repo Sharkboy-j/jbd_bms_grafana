@@ -78,7 +78,7 @@ func findBmsDevice() bool {
 	}
 	updateTimeout()
 
-	Log.Infof("connected: %s", devAdress.String())
+	Log.Debugf("connected: %s", devAdress.String())
 
 	srvUid, err := bluetooth.ParseUUID(serviceUUIDString)
 	txUid, err := bluetooth.ParseUUID(txUUIDString)
