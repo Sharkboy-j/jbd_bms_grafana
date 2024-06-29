@@ -155,6 +155,7 @@ func parseData(data []byte) {
 				bmsData.Cells[i] = volts
 			}
 
+			bmsData.Avg = findAverage(bmsData.Cells)
 			bmsData.MaxCell, bmsData.MinCell = bmsData.GetMaxMin()
 			bmsData.Diff = bmsData.MaxCell - bmsData.MinCell
 
@@ -162,6 +163,20 @@ func parseData(data []byte) {
 		}
 
 	}
+}
+
+func findAverage(values []float32) float32 {
+	if len(values) == 0 {
+		return 0
+	}
+
+	var sum float32
+	for _, value := range values {
+		sum += value
+	}
+
+	average := sum / float32(len(values))
+	return average
 }
 
 func calculateRemainingChargingTime(totalCapacity float64, currentChargeLevel float64, chargeCurrent float64) float64 {

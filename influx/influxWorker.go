@@ -56,6 +56,7 @@ func PushCells(data *mods.JbdData) {
 	p.AddField("maxCell", data.MaxCell).
 		AddField("minCell", data.MinCell).
 		AddField("diff", data.Diff).
+		AddField("avg", data.Avg).
 		SetTime(time.Now())
 
 	if err := writeAPI.WritePoint(context.Background(), p); err != nil {
