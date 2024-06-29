@@ -56,6 +56,7 @@ func main() {
 	Log = logger.New()
 
 	s := os.Getenv("BMS_MAC")
+	_ = os.Getenv("TIMEOUT")
 	u := os.Getenv("BMS_UUID")
 
 	switch runtime.GOOS {
@@ -88,7 +89,7 @@ func timeoutCheck() {
 
 	for {
 		if isWrited {
-			if time.Since(lastSendTime).Seconds() >= 15 {
+			if time.Since(lastSendTime).Seconds() >= 5 {
 				timeoutCompleted()
 
 				Log.Debugf("!!timeout!!")
