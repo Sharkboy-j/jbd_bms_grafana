@@ -81,7 +81,7 @@ func timeoutCheck() {
 			if time.Since(lastSendTime).Seconds() >= 5 {
 				timeoutCompleted()
 
-				Log.Debugf("!!timeout!!")
+				Log.Warnf("!!timeout!!")
 
 				disconnect()
 			}
