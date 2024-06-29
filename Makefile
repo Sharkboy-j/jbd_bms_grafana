@@ -3,7 +3,7 @@ pull:
 	git pull
 .PHONY: logs
 logs:
-	while true
+	while :
 	do
 		sudo docker logs -f --tail 10 bms
 	done
