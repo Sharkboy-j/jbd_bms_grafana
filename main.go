@@ -8,7 +8,7 @@ import (
 	"bleTest/mods"
 	"errors"
 	"fmt"
-	"github.com/akamensky/argparse"
+	"os"
 	"runtime"
 	"runtime/debug"
 	"sync"
@@ -16,6 +16,7 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
+//goland:noinspection GoErrorStringFormat
 var (
 	adapter           = *bluetooth.DefaultAdapter
 	serviceUUIDString = "0000ff00-0000-1000-8000-00805f9b34fb"
@@ -35,13 +36,16 @@ var (
 	msgWG             = new(sync.WaitGroup)
 )
 
-const StartBit byte = 0xDD
-const StopBit byte = 0x77
+const (
+	StartBit   byte = 0xDD
+	StopBit    byte = 0x77
+	macAddrStr      = "A5:C2:37:06:1B:C9"
+	uidAddrStr      = "59d9d8cf-7dc9-2f43-ab65-dc2907a5fc4d"
+)
 
 func handlePanic() {
 	if r := recover(); r != nil {
 		Log.Debugf("Recovered from panic: %v", r)
-		// Perform any cleanup or logging here
 	}
 }
 
@@ -49,26 +53,24 @@ func main() {
 	debug.SetGCPercent(10)
 	done := make(chan bool, 1)
 	defer handlePanic()
-
 	Log = logger.New()
-	//ctx = app.SigTermIntCtx()
 
-	parser := argparse.NewParser("print", "Prints provided string to stdout")
-	s := parser.String("m", "mac", &argparse.Options{Required: false, Help: "required when win or linux"})
-	u := parser.String("u", "uuid", &argparse.Options{Required: false, Help: "required when mac"})
-
-	if *s == "" {
-		*s = "A5:C2:37:06:1B:C9"
-	}
+	s := os.Getenv("BMS_MAC")
+	u := os.Getenv("BMS_UUID")
 
 	switch runtime.GOOS {
 	case "windows", "linux", "baremetal":
-		devAdress = bluetoothHelper.GetAdress(Log, *s)
-	case "darwin":
-		str := "59d9d8cf-7dc9-2f43-ab65-dc2907a5fc4d"
-		u = &str
+		if s == "" {
+			s = macAddrStr
+		}
 
-		devAdress = bluetoothHelper.GetAdress(Log, *u)
+		devAdress = bluetoothHelper.GetAdress(Log, s)
+	case "darwin":
+		if u == "" {
+			u = uidAddrStr
+		}
+
+		devAdress = bluetoothHelper.GetAdress(Log, u)
 	default:
 		fmt.Printf("Current platform is %s\n", runtime.GOOS)
 	}

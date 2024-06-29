@@ -3,7 +3,6 @@ module bleTest
 go 1.22
 
 require (
-	github.com/akamensky/argparse v1.4.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/influxdata/influxdb-client-go/v2 v2.13.0
 	github.com/sirupsen/logrus v1.9.3

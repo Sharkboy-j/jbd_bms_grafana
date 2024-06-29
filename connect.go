@@ -2,13 +2,11 @@ package main
 
 import (
 	"bleTest/app"
-	"fmt"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
 
 var (
-	conErr = fmt.Errorf("device with the given address was not found")
 	device bluetooth.Device
 )
 
