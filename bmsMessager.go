@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bleTest/app"
 	"bleTest/influx"
 	"bleTest/mods"
 	"encoding/hex"
@@ -19,12 +18,12 @@ var (
 )
 
 func writerChan() {
-	errCount := 0
+	errCounter := 0
 	Log.Debugf("start write cycle")
 
 	msg := ReadMessage
 	for {
-		if app.Canceled {
+		if Canceled {
 			break
 		}
 		Log.Debugf("==================================================================================================================================")
@@ -57,14 +56,14 @@ func writerChan() {
 			}
 
 			Log.Errorf("unknown error %s :%v", reflect.TypeOf(err).String(), err.Error())
-			errCount++
-			if errCount > 4 {
+			errCounter++
+			if errCounter > 4 {
 				break
 			}
 
 			continue
 		} else {
-			errCount = 0
+			errCounter = 0
 		}
 
 		Log.Debugf("wait chan...")

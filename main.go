@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bleTest/app"
 	"bleTest/bluetoothHelper"
 	"bleTest/influx"
 	"bleTest/logger"
@@ -68,11 +67,9 @@ func main() {
 		fmt.Printf("Current platform is %s\n", runtime.GOOS)
 	}
 	influx.Init(Log)
-
 	go starty()
 
 	<-done
-
 	Log.Debugf("Exiting application.")
 }
 
@@ -97,13 +94,12 @@ func timeoutCheck() {
 func starty() {
 	go timeoutCheck()
 
-	if connect() && app.Canceled == false {
+	if findBmsDevice() && Canceled == false {
 		writerChan()
 	}
-
-	time.Sleep(3 * time.Second)
 }
 
-func disconnect() {
-	panic("restart due to shit")
+func disconnect(err ...any) {
+	Log.Errorf("restart due to shit:")
+	panic(err)
 }
