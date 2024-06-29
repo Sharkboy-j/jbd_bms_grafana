@@ -27,5 +27,6 @@ build:
 	@$(MAKE) pull
 	go mod download
 	go build -o bleTest .
+	chmod +x bleTest
 	sudo docker build -t bms --no-cache .
 	@$(MAKE) run
