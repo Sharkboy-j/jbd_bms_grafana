@@ -1,3 +1,5 @@
+MAKEFLAGS += --no-print-directory
+
 .PHONY: pull
 pull:
 	git pull
