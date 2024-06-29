@@ -15,7 +15,10 @@ run:
 	sudo docker logs -f --tail 10 bms
 .PHONY: logs
 logs:
-	sudo docker logs -f --tail 10 bms
+	while true
+	do
+		sudo docker logs -f --tail 10 bms
+	done
 .PHONY: kill
 kill:
 	sudo docker kill bms
