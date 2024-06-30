@@ -158,9 +158,10 @@ func findBmsDevice() bool {
 
 		return false
 	}
-	Log.Debugf("nofigications enabled")
+	Log.Infof("notifications enabled")
 
 	timeoutCompleted()
+	Log.Infof("success")
 
 	return true
 }
