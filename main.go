@@ -42,10 +42,10 @@ const (
 )
 
 func main() {
-	Log.Infof("Entry point")
 	debug.SetGCPercent(10)
 	done := make(chan bool, 1)
 	Log = logger.New()
+	Log.Infof("Entry point")
 
 	s := os.Getenv("BMS_MAC")
 	_ = os.Getenv("TIMEOUT")
