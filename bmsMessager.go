@@ -157,7 +157,9 @@ func parseData(data []byte) {
 			chargeCurrent := float64(bmsData.Current)
 
 			remainingTime := calculateRemainingChargingTime(totalCapacity, float64(currentChargeLevel)/100, chargeCurrent)
-			bmsData.Left = remainingTime
+			//0.85	-	?
+			//1		-	60
+			bmsData.Left = 60 * remainingTime / 1
 
 			influx.PushData(bmsData)
 		}
