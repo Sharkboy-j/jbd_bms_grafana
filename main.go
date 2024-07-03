@@ -42,6 +42,7 @@ const (
 )
 
 func main() {
+	Log.Infof("Entry point")
 	debug.SetGCPercent(10)
 	done := make(chan bool, 1)
 	Log = logger.New()
@@ -70,7 +71,7 @@ func main() {
 	go starty()
 
 	<-done
-	Log.Debugf("Exiting application.")
+	Log.Infof("Exiting application.")
 }
 
 func timeoutCheck() {
