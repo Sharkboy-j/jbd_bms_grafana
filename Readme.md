@@ -2,7 +2,8 @@
 
 docker-compose.yml
 
-```version: "2.1"
+```
+version: "2.1"
 services:
   bms:
     image: bms
